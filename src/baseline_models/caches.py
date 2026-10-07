@@ -6,28 +6,19 @@ eviction. These are the "zero learning, zero drift-awareness" floor that
 any RL controller needs to beat.
 
 SCOPE NOTE: this module owns only the caching *policy* logic. It makes
-no assumption about how query records are generated -- that is the
-gym's responsibility (built separately). See decision_log.md, entry D1,
-for the exact interface contract this module expects from whatever
-produces query records.
+no assumption about how query records are generated; the caller is
+responsible for producing records with the required fields.
 
-Design notes (see decision_log.md for the reasoning/citations behind
-each choice, referenced by ID below):
-- Cosine similarity is used as the match metric (D2), against a fixed
-  threshold (D3, default 0.85).
-- The similarity-matching step is IDENTICAL across both baselines and
-  will be reused, unchanged, for the RL controller's fixed-threshold
-  ablation -- only the eviction policy differs. This isolates "does
-  learning help?" from "did we just change the matching machinery?"
-- On a hit, we record whether the served entry was STALE at serve time
-  (its cached content_version != the query's current ground-truth
-  content_version, supplied by the caller). This is only computable
-  because ground truth is controllable in a simulation -- the same
-  caveat flagged for the CMAB / CacheSense / FreshCache papers.
-- Eviction tie-breaking is deterministic (D5).
-- Metric definitions mirror CacheSense's Table 1 exactly (D6).
-- NoCache is included as the trivial upper bound on cost / lower bound
-  on staleness, matching the convention used in all four reviewed papers.
+Design notes:
+- Cosine similarity is used as the match metric against a fixed
+  threshold (default 0.85).
+- The similarity-matching step is identical across both baselines and
+  can be reused by a fixed-threshold controller; only eviction differs.
+- On a hit, the cache records whether the served entry is stale by
+  comparing its cached content version with the query's current version.
+- Eviction tie-breaking is deterministic.
+- Metrics report hit rate, stale-hit rate, and normalized API cost.
+- NoCache is the trivial upper bound on cost and lower bound on staleness.
 """
 
 from dataclasses import dataclass, field
@@ -111,8 +102,7 @@ class SemanticCacheBaseline:
             - "step": int, a monotonically increasing counter (used for LRU)
 
         This is the full interface contract this module expects from
-        whatever generates the query stream (the gym, built separately).
-        See decision_log.md, entry D1.
+        whatever generates the query stream.
         """
         self.n_queries += 1
         self.total_cost_nocache += record["true_cost"]

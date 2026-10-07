@@ -4,18 +4,14 @@ test_stub_data.py
 *** THIS IS TEST SCAFFOLDING ONLY -- NOT THE PROJECT'S GYM. ***
 
 The real query-stream / drift environment ("the gym") is being built
-separately by a teammate. This file exists purely so that `caches.py`
-(the LRU/LFU/vCache/MAB baseline logic) can be exercised and sanity-
-checked in isolation, without waiting on the real gym to be ready.
+separately. This file exists purely so that `caches.py` (the LRU/LFU
+baseline logic) can be exercised and sanity-checked in isolation, without
+waiting on the real gym to be ready.
 
 No parameter in this file is tuned for realism, and no result produced
-using this file should ever be reported as a project result -- see
-decision_log.md, entries D1 and D7.
-
-Once the real gym exists, `caches.py` should be pointed at its output
-instead; nothing in `caches.py` needs to change, since it only depends
-on the record interface documented in `SemanticCacheBaseline.process`'s
-docstring (embedding, true_cost, content_version, step).
+using this file should be reported as a project benchmark. Once the real
+gym exists, `caches.py` can consume its output through the record interface
+documented in `SemanticCacheBaseline.process`.
 """
 
 import numpy as np
