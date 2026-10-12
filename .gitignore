@@ -1,3 +1,6 @@
 /.venv
 __pycache__/
 src/datasets/dataset.ipynb
+
+# Local internal algorithm documentation
+/docs/private_algorithm.md

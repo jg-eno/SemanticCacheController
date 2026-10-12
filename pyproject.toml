@@ -8,4 +8,6 @@ dependencies = [
     "datasets>=5.1.0",
     "gymnasium>=1.4.0",
     "ipykernel>=7.4.0",
+    "sentence-transformers>=6.1.0",
+    "torch>=2.14.1",
 ]

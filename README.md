@@ -1,90 +1,105 @@
 # Semantic Cache Controller
 
-# Evaluation Strategies
+A Python project for simulating semantic caching under changing query workloads. It provides a Gymnasium environment, dataset adapters, deterministic baselines, and offline evaluation.
 
-## 1. Cache Effectiveness
+The current implementation is a simulation. Its results do not establish production answer correctness, serving latency, or monetary savings. Custom PPO-Lagrangian training is available for offline experiments.
 
--   **Semantic Hit Rate:** cache hits / total queries.
--   **Cost-Weighted Hit Rate:** gives more weight to hits that save more
-    tokens or latency.
+## Setup
 
-## 2. Correctness of Reuse
+Use Python 3.13 or later. From the repository root:
 
--   **Precision, Recall and F1:** evaluate whether cached responses are
-    actually reusable.
--   **False-Hit / Error Rate:** measure incorrect cached answers.
--   **Error-Bound Satisfaction:** verify that observed error stays below
-    the target limit.
--   **P-CHR AUC:** evaluate precision across different cache-utilization
-    levels.
--   **Answer Quality:** validate sampled cache hits using labeled query
-    pairs or an LLM-as-judge.
+```sh
+python -m pip install numpy gymnasium datasets sentence-transformers
+```
 
-## 3. Latency and Cost
+Only NumPy and Gymnasium are needed for the default offline tests. Running the sample or evaluation with the default encoder downloads a sentence-embedding model on first use.
 
--   Measure **mean, P50, P95 and P99 end-to-end latency**.
--   Report cache lookup latency separately.
--   Measure **cost per query, tokens saved and savings per hit**.
+## Quick start
 
-## 4. Freshness and Data Drift
+Run the bundled sample workload:
 
--   **Stale-Hit Rate:** fraction of cache hits returning outdated
-    answers.
--   **Invalidation Precision, Recall and F1.**
--   **Average Staleness Penalty.**
+```sh
+python main.py
+```
 
-## 5. Query and Data Drift Adaptation
+Minimal environment creation:
 
-Evaluate performance before and after drift using: - Windowed hit rate,
-precision and stale-hit rate. - Performance drop at drift. - **Recovery
-Time:** queries/episodes needed to return close to pre-drift
-performance. - **Threshold Trajectory:** how the learned threshold
-changes with drift.
+```python
+from src.datasets.workload import read
+from src.semantic_cache import SemanticCacheEnv
 
-## 6. RL Performance
+env = SemanticCacheEnv(read("src/datasets/example_workload.jsonl"))
+observation, info = env.reset(seed=42)
+observation, reward, terminated, truncated, info = env.step(1)
+env.close()
+```
 
--   Cumulative and average reward.
--   Convergence speed.
--   Regret.
--   Cache switching count.
--   Training time and stability.
--   Run multiple seeds and report **mean ± 95% confidence interval**.
+## Evaluation and tests
 
-## 7. Controller Overhead
+Compare the deterministic baselines on the example and held-out workloads:
 
--   RL decision latency per query.
--   Memory footprint of the RL policy and cache.
--   **Net Benefit = latency/cost savings − controller overhead.**
+```sh
+python -m src.evaluate src/datasets/example_workload.jsonl --held-out src/datasets/example_held_out.jsonl
+python -m unittest discover -s src/tests -v
+```
 
-## 8. Baseline Comparison
+The bundled workloads are synthetic examples. Default tests run without downloading datasets or embedding models. Use `python -m src.evaluate --help` and `python -m src.datasets.workload --help` for available commands and configuration.
 
-Compare the proposed controller with: - No Cache - FIFO - LRU - LFU -
-ARC - Static/best tuned threshold - GPTCache-style semantic caching -
-vCache-style learned threshold
+## Repository structure
 
-Also include RL ablations: - **RL threshold only** - **RL eviction
-only** - **No freshness signal**
+```text
+.
+├── main.py                     # Sample environment entry point
+├── pyproject.toml              # Project metadata and dependencies
+├── uv.lock                     # Dependency lockfile
+├── README.md
+├── docs/                       # Supporting documents and assets
+└── src/
+    ├── semantic_cache.py       # Public environment imports
+    ├── evaluate.py             # Baseline evaluation CLI
+    ├── rl/                     # PPO-Lagrangian training and evaluation
+    ├── baseline_models/        # Additional baseline files
+    ├── datasets/               # Workload adapters and example data
+    ├── env/                    # Gymnasium environment
+    ├── models/                 # Cache, embedding, and drift components
+    └── tests/                  # Offline automated tests
+```
 
-## 9. Sensitivity and Robustness
+## Data sources
 
-Evaluate different: - Cache sizes - Similarity thresholds - Drift speeds
-and magnitudes - Query workloads - Embedding models - Random seeds
+The primary dataset is [SemCacheLMArena](https://huggingface.co/datasets/vCache/SemBenchmarkLmArena), whose dataset card lists Apache-2.0. Optional evaluation sources are [WildChat](https://huggingface.co/datasets/allenai/WildChat) (ODC-BY) and [CacheEval](https://github.com/BudEcosystem/CacheEval) (CC BY-SA 4.0 for data and MIT for scripts, according to its repository). Consult upstream attribution and licensing before redistributing external data. No external dataset is bundled here.
 
-## 10. Recommended Core Results
+## PPO-Lagrangian training
 
-  Objective             Main Metric
-  --------------------- ---------------------------------
-  Cache effectiveness   Semantic Hit Rate
-  Correctness           Precision, False-Hit Rate
-  Latency               P50 / P95 / P99
-  Cost                  Cost per Query
-  Freshness             Stale-Hit Rate
-  Drift adaptation      Recovery Time
-  RL quality            Cumulative Reward / Convergence
-  Overhead              Decision Latency / Net Benefit
+Install PyTorch in addition to the environment dependencies:
 
-### Main Evaluation Goal
+```sh
+python -m pip install torch
+python -m src.rl.train --env-factory your_adapter:make_env --train-settings train.json --validation-settings validation.json --output /tmp/cache-ppo-run --seed 0
+```
 
-The RL controller should **increase useful cache reuse and reduce
-latency/cost while keeping incorrect and stale responses within an
-acceptable limit**, especially under query and data drift.
+The environment factory is supplied explicitly; no existing environment import is assumed. Each settings file is a JSON object passed as keyword arguments to that callable. Registered environments can use `--env-factory gym:YourRegisteredID`. Use separate chronological training and validation traces. Record workload paths/revisions, encoder revision, cache capacity, retrieval threshold, reward settings and other environment options in those files. Training does not read held-out data.
+
+The adapter must preserve the six-feature float32 observation and actions 0/1. Step info must provide `effective_action`, `reuse_status` (`correct`, `incorrect`, `unevaluable`, `not_reused`), and finite `reward_components` including the signed `recompute_cost`; components must sum to the returned reward. For labeled-request coverage, provide boolean `labeled_request` in step info or pass `--train-labels` and `--validation-labels` JSON maps from request ID to source intent or null. These are offline metadata. Evaluation additionally requires `cache_hit`, fractional `cache_occupancy`, and `phase_id` for phase/transition reports.
+
+Experimental constraint defaults are false-hit rate ≤ 0.01 and recomputation rate ≤ 0.5, configured by `--false-limit` and `--recompute-limit`. False-hit rates use evaluable labeled requests; actual recomputations include forced misses. Unevaluable reuse is reported as unknown. By default, feasibility requires at least 32 evaluable labeled requests and full evaluable coverage. When the recomputation constraint is enabled, training utility excludes the explicit logged recomputation penalty, while raw environment reward remains logged.
+
+Use `python -m src.rl.train --help` for timestep, rollout, minibatch, optimizer, discount/GAE, clipping, entropy, multiplier, evaluation and checkpoint options. Limits are experimental, and constraints may be infeasible for a trace. Use a fresh output directory per seed/run. Outputs include `config.json`, `metrics.jsonl`, `costs.jsonl`, periodic checkpoints, `final.pt`, and `selection.json`. `best.pt` exists only if validation satisfies every enabled constraint with sufficient labeled evidence.
+
+## Learned-policy evaluation
+
+Provide `baselines.json` mapping `always_reuse`, `always_recompute`, and `drift_rule` to their existing `module:callable` policies. Each callable accepts only the observation and returns action 0 or 1.
+
+```sh
+python -m src.rl.evaluate --checkpoint /tmp/cache-ppo-run/best.pt --env-factory your_adapter:make_env --held-out-settings held_out.json --baselines baselines.json --seeds 0 1 2 --output /tmp/cache-ppo-held-out.json
+```
+
+Use `--held-out-labels` if your adapter does not emit labeled-request metadata. Evaluation uses deterministic actions and fresh environments with identical settings for all policies. Reports include utility, label coverage, false-hit/recomputation rates, constraint violations, cache metrics, phase/transition results, multipliers and mean/standard deviation across seeds. Do not use held-out results to select checkpoints or tune settings. Distinct settings and disjoint label maps are checked where available; the factory owner must ensure actual temporal split separation. Repeating a deterministic trace across seeds is not independent workload evidence.
+
+The new policy tests use a small synthetic Gymnasium fixture and need no downloads:
+
+```sh
+python -m unittest src.tests.test_ppo_lagrangian -v
+```
+
+Training stability, convergence, and constraint satisfaction on real workloads remain experimental; unit tests establish implementation behavior rather than production performance.

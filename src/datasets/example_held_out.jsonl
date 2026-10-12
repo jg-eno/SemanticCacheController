@@ -1,0 +1,96 @@
+{"request_id": "s17-r0", "intent_id": "example-ceo", "query": "Company X's CEO?", "topic_id": null, "phase_id": 0, "step": 0}
+{"request_id": "s17-r1", "intent_id": "example-capital", "query": "What is the capital of France?", "topic_id": null, "phase_id": 0, "step": 1}
+{"request_id": "s17-r2", "intent_id": "example-capital", "query": "Name France's capital.", "topic_id": null, "phase_id": 0, "step": 2}
+{"request_id": "s17-r3", "intent_id": "example-ceo", "query": "Who is the CEO of Company X?", "topic_id": null, "phase_id": 0, "step": 3}
+{"request_id": "s17-r4", "intent_id": "example-capital", "query": "Name France's capital.", "topic_id": null, "phase_id": 0, "step": 4}
+{"request_id": "s17-r5", "intent_id": "example-capital", "query": "What is the capital of France?", "topic_id": null, "phase_id": 0, "step": 5}
+{"request_id": "s17-r6", "intent_id": "example-capital", "query": "Name France's capital.", "topic_id": null, "phase_id": 0, "step": 6}
+{"request_id": "s17-r7", "intent_id": "example-ceo", "query": "Who currently leads Company X?", "topic_id": null, "phase_id": 0, "step": 7}
+{"request_id": "s17-r8", "intent_id": "example-capital", "query": "Name France's capital.", "topic_id": null, "phase_id": 0, "step": 8}
+{"request_id": "s17-r9", "intent_id": "example-capital", "query": "Name France's capital.", "topic_id": null, "phase_id": 0, "step": 9}
+{"request_id": "s17-r10", "intent_id": "example-capital", "query": "Name France's capital.", "topic_id": null, "phase_id": 0, "step": 10}
+{"request_id": "s17-r11", "intent_id": "example-capital", "query": "What is the capital of France?", "topic_id": null, "phase_id": 0, "step": 11}
+{"request_id": "s17-r12", "intent_id": "example-ceo", "query": "Who is the CEO of Company X?", "topic_id": null, "phase_id": 0, "step": 12}
+{"request_id": "s17-r13", "intent_id": "example-ceo", "query": "Company X's CEO?", "topic_id": null, "phase_id": 0, "step": 13}
+{"request_id": "s17-r14", "intent_id": "example-capital", "query": "What is the capital of France?", "topic_id": null, "phase_id": 0, "step": 14}
+{"request_id": "s17-r15", "intent_id": "example-capital", "query": "What is the capital of France?", "topic_id": null, "phase_id": 0, "step": 15}
+{"request_id": "s17-r16", "intent_id": "example-capital", "query": "What is the capital of France?", "topic_id": null, "phase_id": 0, "step": 16}
+{"request_id": "s17-r17", "intent_id": "example-capital", "query": "What is the capital of France?", "topic_id": null, "phase_id": 0, "step": 17}
+{"request_id": "s17-r18", "intent_id": "example-ceo", "query": "Who currently leads Company X?", "topic_id": null, "phase_id": 0, "step": 18}
+{"request_id": "s17-r19", "intent_id": "example-capital", "query": "Name France's capital.", "topic_id": null, "phase_id": 0, "step": 19}
+{"request_id": "s17-r20", "intent_id": "example-capital", "query": "What is the capital of France?", "topic_id": null, "phase_id": 0, "step": 20}
+{"request_id": "s17-r21", "intent_id": "example-capital", "query": "Name France's capital.", "topic_id": null, "phase_id": 0, "step": 21}
+{"request_id": "s17-r22", "intent_id": "example-capital", "query": "What is the capital of France?", "topic_id": null, "phase_id": 0, "step": 22}
+{"request_id": "s17-r23", "intent_id": "example-capital", "query": "Name France's capital.", "topic_id": null, "phase_id": 0, "step": 23}
+{"request_id": "s17-r24", "intent_id": "example-capital", "query": "What is the capital of France?", "topic_id": null, "phase_id": 0, "step": 24}
+{"request_id": "s17-r25", "intent_id": "example-capital", "query": "Name France's capital.", "topic_id": null, "phase_id": 0, "step": 25}
+{"request_id": "s17-r26", "intent_id": "example-capital", "query": "Name France's capital.", "topic_id": null, "phase_id": 0, "step": 26}
+{"request_id": "s17-r27", "intent_id": "example-ceo", "query": "Company X's CEO?", "topic_id": null, "phase_id": 0, "step": 27}
+{"request_id": "s17-r28", "intent_id": "example-capital", "query": "What is the capital of France?", "topic_id": null, "phase_id": 0, "step": 28}
+{"request_id": "s17-r29", "intent_id": "example-ceo", "query": "Who is the CEO of Company X?", "topic_id": null, "phase_id": 0, "step": 29}
+{"request_id": "s17-r30", "intent_id": "example-capital", "query": "Name France's capital.", "topic_id": null, "phase_id": 0, "step": 30}
+{"request_id": "s17-r31", "intent_id": "example-capital", "query": "What is the capital of France?", "topic_id": null, "phase_id": 0, "step": 31}
+{"request_id": "s17-r32", "intent_id": "example-ceo", "query": "Who currently leads Company X?", "topic_id": null, "phase_id": 1, "step": 32}
+{"request_id": "s17-r33", "intent_id": "example-ceo", "query": "Who is the CEO of Company X?", "topic_id": null, "phase_id": 1, "step": 33}
+{"request_id": "s17-r34", "intent_id": "example-capital", "query": "Name France's capital.", "topic_id": null, "phase_id": 1, "step": 34}
+{"request_id": "s17-r35", "intent_id": "example-capital", "query": "What is the capital of France?", "topic_id": null, "phase_id": 1, "step": 35}
+{"request_id": "s17-r36", "intent_id": "example-ceo", "query": "Who is the CEO of Company X?", "topic_id": null, "phase_id": 1, "step": 36}
+{"request_id": "s17-r37", "intent_id": "example-capital", "query": "Name France's capital.", "topic_id": null, "phase_id": 1, "step": 37}
+{"request_id": "s17-r38", "intent_id": "example-ceo", "query": "Who is the CEO of Company X?", "topic_id": null, "phase_id": 1, "step": 38}
+{"request_id": "s17-r39", "intent_id": "example-capital", "query": "What is the capital of France?", "topic_id": null, "phase_id": 1, "step": 39}
+{"request_id": "s17-r40", "intent_id": "example-ceo", "query": "Company X's CEO?", "topic_id": null, "phase_id": 1, "step": 40}
+{"request_id": "s17-r41", "intent_id": "example-ceo", "query": "Who currently leads Company X?", "topic_id": null, "phase_id": 1, "step": 41}
+{"request_id": "s17-r42", "intent_id": "example-ceo", "query": "Who is the CEO of Company X?", "topic_id": null, "phase_id": 1, "step": 42}
+{"request_id": "s17-r43", "intent_id": "example-ceo", "query": "Who currently leads Company X?", "topic_id": null, "phase_id": 1, "step": 43}
+{"request_id": "s17-r44", "intent_id": "example-capital", "query": "What is the capital of France?", "topic_id": null, "phase_id": 1, "step": 44}
+{"request_id": "s17-r45", "intent_id": "example-capital", "query": "Name France's capital.", "topic_id": null, "phase_id": 1, "step": 45}
+{"request_id": "s17-r46", "intent_id": "example-ceo", "query": "Who is the CEO of Company X?", "topic_id": null, "phase_id": 1, "step": 46}
+{"request_id": "s17-r47", "intent_id": "example-ceo", "query": "Who currently leads Company X?", "topic_id": null, "phase_id": 1, "step": 47}
+{"request_id": "s17-r48", "intent_id": "example-ceo", "query": "Company X's CEO?", "topic_id": null, "phase_id": 1, "step": 48}
+{"request_id": "s17-r49", "intent_id": "example-ceo", "query": "Who currently leads Company X?", "topic_id": null, "phase_id": 1, "step": 49}
+{"request_id": "s17-r50", "intent_id": "example-ceo", "query": "Who is the CEO of Company X?", "topic_id": null, "phase_id": 1, "step": 50}
+{"request_id": "s17-r51", "intent_id": "example-ceo", "query": "Company X's CEO?", "topic_id": null, "phase_id": 1, "step": 51}
+{"request_id": "s17-r52", "intent_id": "example-capital", "query": "What is the capital of France?", "topic_id": null, "phase_id": 1, "step": 52}
+{"request_id": "s17-r53", "intent_id": "example-ceo", "query": "Who currently leads Company X?", "topic_id": null, "phase_id": 1, "step": 53}
+{"request_id": "s17-r54", "intent_id": "example-ceo", "query": "Who is the CEO of Company X?", "topic_id": null, "phase_id": 1, "step": 54}
+{"request_id": "s17-r55", "intent_id": "example-ceo", "query": "Company X's CEO?", "topic_id": null, "phase_id": 1, "step": 55}
+{"request_id": "s17-r56", "intent_id": "example-capital", "query": "Name France's capital.", "topic_id": null, "phase_id": 1, "step": 56}
+{"request_id": "s17-r57", "intent_id": "example-ceo", "query": "Company X's CEO?", "topic_id": null, "phase_id": 1, "step": 57}
+{"request_id": "s17-r58", "intent_id": "example-ceo", "query": "Company X's CEO?", "topic_id": null, "phase_id": 1, "step": 58}
+{"request_id": "s17-r59", "intent_id": "example-ceo", "query": "Who is the CEO of Company X?", "topic_id": null, "phase_id": 1, "step": 59}
+{"request_id": "s17-r60", "intent_id": "example-ceo", "query": "Company X's CEO?", "topic_id": null, "phase_id": 1, "step": 60}
+{"request_id": "s17-r61", "intent_id": "example-ceo", "query": "Company X's CEO?", "topic_id": null, "phase_id": 1, "step": 61}
+{"request_id": "s17-r62", "intent_id": "example-ceo", "query": "Who currently leads Company X?", "topic_id": null, "phase_id": 1, "step": 62}
+{"request_id": "s17-r63", "intent_id": "example-ceo", "query": "Who currently leads Company X?", "topic_id": null, "phase_id": 1, "step": 63}
+{"request_id": "s17-r64", "intent_id": "example-sort", "query": "Sorting lists in Python?", "topic_id": null, "phase_id": 2, "step": 64}
+{"request_id": "s17-r65", "intent_id": "example-sort", "query": "Sorting lists in Python?", "topic_id": null, "phase_id": 2, "step": 65}
+{"request_id": "s17-r66", "intent_id": "example-sort", "query": "Sorting lists in Python?", "topic_id": null, "phase_id": 2, "step": 66}
+{"request_id": "s17-r67", "intent_id": "example-sort", "query": "How do I sort a Python list?", "topic_id": null, "phase_id": 2, "step": 67}
+{"request_id": "s17-r68", "intent_id": "example-sort", "query": "How do I sort a Python list?", "topic_id": null, "phase_id": 2, "step": 68}
+{"request_id": "s17-r69", "intent_id": "example-ceo", "query": "Who is the CEO of Company X?", "topic_id": null, "phase_id": 2, "step": 69}
+{"request_id": "s17-r70", "intent_id": "example-sort", "query": "Sorting lists in Python?", "topic_id": null, "phase_id": 2, "step": 70}
+{"request_id": "s17-r71", "intent_id": "example-ceo", "query": "Who currently leads Company X?", "topic_id": null, "phase_id": 2, "step": 71}
+{"request_id": "s17-r72", "intent_id": "example-sort", "query": "Sorting lists in Python?", "topic_id": null, "phase_id": 2, "step": 72}
+{"request_id": "s17-r73", "intent_id": "example-ceo", "query": "Company X's CEO?", "topic_id": null, "phase_id": 2, "step": 73}
+{"request_id": "s17-r74", "intent_id": "example-sort", "query": "How do I sort a Python list?", "topic_id": null, "phase_id": 2, "step": 74}
+{"request_id": "s17-r75", "intent_id": "example-sort", "query": "How do I sort a Python list?", "topic_id": null, "phase_id": 2, "step": 75}
+{"request_id": "s17-r76", "intent_id": "example-ceo", "query": "Company X's CEO?", "topic_id": null, "phase_id": 2, "step": 76}
+{"request_id": "s17-r77", "intent_id": "example-sort", "query": "How do I sort a Python list?", "topic_id": null, "phase_id": 2, "step": 77}
+{"request_id": "s17-r78", "intent_id": "example-sort", "query": "Sorting lists in Python?", "topic_id": null, "phase_id": 2, "step": 78}
+{"request_id": "s17-r79", "intent_id": "example-sort", "query": "Sorting lists in Python?", "topic_id": null, "phase_id": 2, "step": 79}
+{"request_id": "s17-r80", "intent_id": "example-sort", "query": "Sorting lists in Python?", "topic_id": null, "phase_id": 2, "step": 80}
+{"request_id": "s17-r81", "intent_id": "example-sort", "query": "How do I sort a Python list?", "topic_id": null, "phase_id": 2, "step": 81}
+{"request_id": "s17-r82", "intent_id": "example-sort", "query": "How do I sort a Python list?", "topic_id": null, "phase_id": 2, "step": 82}
+{"request_id": "s17-r83", "intent_id": "example-sort", "query": "How do I sort a Python list?", "topic_id": null, "phase_id": 2, "step": 83}
+{"request_id": "s17-r84", "intent_id": "example-sort", "query": "Sorting lists in Python?", "topic_id": null, "phase_id": 2, "step": 84}
+{"request_id": "s17-r85", "intent_id": "example-ceo", "query": "Company X's CEO?", "topic_id": null, "phase_id": 2, "step": 85}
+{"request_id": "s17-r86", "intent_id": "example-ceo", "query": "Who is the CEO of Company X?", "topic_id": null, "phase_id": 2, "step": 86}
+{"request_id": "s17-r87", "intent_id": "example-sort", "query": "Sorting lists in Python?", "topic_id": null, "phase_id": 2, "step": 87}
+{"request_id": "s17-r88", "intent_id": "example-sort", "query": "How do I sort a Python list?", "topic_id": null, "phase_id": 2, "step": 88}
+{"request_id": "s17-r89", "intent_id": "example-sort", "query": "Sorting lists in Python?", "topic_id": null, "phase_id": 2, "step": 89}
+{"request_id": "s17-r90", "intent_id": "example-sort", "query": "Sorting lists in Python?", "topic_id": null, "phase_id": 2, "step": 90}
+{"request_id": "s17-r91", "intent_id": "example-sort", "query": "How do I sort a Python list?", "topic_id": null, "phase_id": 2, "step": 91}
+{"request_id": "s17-r92", "intent_id": "example-ceo", "query": "Who is the CEO of Company X?", "topic_id": null, "phase_id": 2, "step": 92}
+{"request_id": "s17-r93", "intent_id": "example-sort", "query": "How do I sort a Python list?", "topic_id": null, "phase_id": 2, "step": 93}
+{"request_id": "s17-r94", "intent_id": "example-ceo", "query": "Who currently leads Company X?", "topic_id": null, "phase_id": 2, "step": 94}
+{"request_id": "s17-r95", "intent_id": "example-sort", "query": "How do I sort a Python list?", "topic_id": null, "phase_id": 2, "step": 95}
