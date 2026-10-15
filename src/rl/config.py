@@ -9,8 +9,7 @@ import gymnasium as gym
 import numpy as np
 import torch
 
-FEATURE_NAMES = ('query_embedding_shift', 'query_novelty', 'recent_cache_miss_rate',
-                 'recent_reuse_rate', 'cache_occupancy', 'budget_remaining')
+from ..env.semantic_cache_env import FEATURE_NAMES
 
 
 @dataclass
@@ -87,8 +86,8 @@ def seed_all(seed):
 
 def observation(value):
     array = np.asarray(value)
-    if array.shape != (6,) or array.dtype != np.float32 or not np.isfinite(array).all():
-        raise ValueError('Actor input must be a finite float32 observation of shape (6,)')
+    if array.shape != (len(FEATURE_NAMES),) or array.dtype != np.float32 or not np.isfinite(array).all():
+        raise ValueError(f'Actor input must be a finite float32 observation of shape ({len(FEATURE_NAMES)},)')
     return array.copy()
 
 
@@ -109,8 +108,8 @@ def make_env(factory, settings, seed):
         env = (load_factory(factory) if isinstance(factory, str) else factory)(**settings)
     if not isinstance(env.action_space, gym.spaces.Discrete) or env.action_space.n != 2 or env.action_space.start != 0:
         raise ValueError('Environment must preserve Discrete(2) actions 0 and 1')
-    if env.observation_space.shape != (6,) or env.observation_space.dtype != np.float32:
-        raise ValueError('Environment must preserve the six-dimensional float32 observation')
+    if env.observation_space.shape != (len(FEATURE_NAMES),) or env.observation_space.dtype != np.float32:
+        raise ValueError(f'Environment must preserve the {len(FEATURE_NAMES)}-dimensional float32 observation')
     env.action_space.seed(seed)
     return env
 

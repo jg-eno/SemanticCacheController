@@ -15,7 +15,7 @@ from ..datasets.workload import validate
 from ..models.query_drift import ProjectionHistogramDrift
 
 FEATURE_NAMES = ('query_embedding_shift', 'query_novelty', 'recent_cache_miss_rate',
-                 'recent_reuse_rate', 'cache_occupancy', 'budget_remaining')
+                 'recent_reuse_rate', 'cache_occupancy')
 REUSE, RECOMPUTE = 0, 1
 
 
@@ -76,7 +76,7 @@ class SemanticCacheEnv(gym.Env):
         # Request-specific placeholders do not consult evaluation labels.
         self.response_provider = response_provider or (lambda row: 'reference:' + row['request_id'])
         self.action_space = spaces.Discrete(2)
-        self.observation_space = spaces.Box(0, 1, shape=(6,), dtype=np.float32)
+        self.observation_space = spaces.Box(0, 1, shape=(len(FEATURE_NAMES),), dtype=np.float32)
         self.done = True
 
     def reset(self, *, seed=None, options=None):
@@ -107,7 +107,7 @@ class SemanticCacheEnv(gym.Env):
         novelty = (1 - self.similarity) / 2 if self.candidate is not None else 1
         self.observation = np.asarray([shift, novelty, np.mean(self.misses) if self.misses else 0,
                                      np.mean(self.reuses) if self.reuses else 0,
-                                     len(self.cache.entries) / self.capacity, 1], dtype=np.float32)
+                                     len(self.cache.entries) / self.capacity], dtype=np.float32)
         self.observation = np.clip(self.observation, 0, 1)
 
     def step(self, action):
@@ -163,7 +163,7 @@ class SemanticCacheEnv(gym.Env):
         self.index += 1
         self.done = self.index == len(self.workload)
         if self.done:
-            self.observation = np.zeros(6, dtype=np.float32)
+            self.observation = np.zeros(len(FEATURE_NAMES), dtype=np.float32)
         else:
             self._prepare()
         return self.observation.copy(), float(sum(components.values())), self.done, False, info

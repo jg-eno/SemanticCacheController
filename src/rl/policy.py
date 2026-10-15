@@ -4,11 +4,11 @@ import numpy as np
 import torch
 from torch import nn
 from torch.distributions import Categorical
-from .config import Config, observation
+from .config import Config, FEATURE_NAMES, observation
 
 
 def network(hidden, output):
-    return nn.Sequential(nn.Linear(6, hidden), nn.Tanh(), nn.Linear(hidden, hidden), nn.Tanh(), nn.Linear(hidden, output))
+    return nn.Sequential(nn.Linear(len(FEATURE_NAMES), hidden), nn.Tanh(), nn.Linear(hidden, hidden), nn.Tanh(), nn.Linear(hidden, output))
 
 
 class ActorCritics(nn.Module):
@@ -18,8 +18,8 @@ class ActorCritics(nn.Module):
         self.critics = nn.ModuleList([network(hidden, 1) for _ in range(3)])
 
     def distribution(self, observations):
-        if observations.shape[-1] != 6:
-            raise ValueError('Actor accepts six features only')
+        if observations.shape[-1] != len(FEATURE_NAMES):
+            raise ValueError(f'Actor accepts {len(FEATURE_NAMES)} features only')
         return Categorical(logits=self.actor(observations))
 
     def values(self, observations):

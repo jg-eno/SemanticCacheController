@@ -118,6 +118,14 @@ The primary dataset is [SemCacheLMArena](https://huggingface.co/datasets/vCache/
 
 ## PPO-Lagrangian training
 
+For a fully local simulation using the repository environment, run:
+
+```sh
+python -m src.rl.simulate --output /tmp/cache-ppo-simulation --seed 0
+```
+
+This creates three separate synthetic chronological traces, trains PPO on the training trace, selects a checkpoint using validation constraints, and compares it with three deterministic baselines on the held-out trace. The encoder is deterministic and needs no model download. `summary.json` contains the concise comparison, `held_out_results.json` the full reports, and `training/` the checkpoints and rollout logs. If validation finds no feasible checkpoint, the script evaluates `final.pt` and marks `validation_feasible` false. Use a new or empty output directory for each run. Adjust `--total-steps`, `--rollout-length`, `--requests-per-phase`, `--false-limit`, and `--recompute-limit` for simulation experiments. This is a synthetic demonstration of the pipeline, not evidence of real-workload performance.
+
 Install PyTorch in addition to the environment dependencies:
 
 ```sh
@@ -127,7 +135,7 @@ python -m src.rl.train --env-factory src.env.factory:make_env --train-settings t
 
 The repository factory accepts `workload_path`, optional `model` and `model_revision`, optional `rewards` as a JSON object, and other environment settings. Each settings file is a JSON object passed as keyword arguments to that callable. Custom factories can use `module:callable`, and registered environments can use `--env-factory gym:YourRegisteredID`. Use separate chronological training and validation traces. Record workload paths/revisions, encoder revision, cache capacity, retrieval threshold, reward settings and other environment options in those files. Training does not read held-out data.
 
-The adapter must preserve the six-feature float32 observation and actions 0/1. Step info must provide `effective_action`, `reuse_status` (`correct`, `incorrect`, `unevaluable`, `not_reused`), and finite `reward_components` including the signed `recompute_cost`; components must sum to the returned reward. For labeled-request coverage, provide boolean `labeled_request` in step info or pass `--train-labels` and `--validation-labels` JSON maps from request ID to source intent or null. These are offline metadata. Evaluation additionally requires `cache_hit`, fractional `cache_occupancy`, and `phase_id` for phase/transition reports.
+The adapter must preserve the five-feature float32 observation and actions 0/1. Step info must provide `effective_action`, `reuse_status` (`correct`, `incorrect`, `unevaluable`, `not_reused`), and finite `reward_components` including the signed `recompute_cost`; components must sum to the returned reward. For labeled-request coverage, provide boolean `labeled_request` in step info or pass `--train-labels` and `--validation-labels` JSON maps from request ID to source intent or null. These are offline metadata. Evaluation additionally requires `cache_hit`, fractional `cache_occupancy`, and `phase_id` for phase/transition reports. Checkpoints trained with the earlier six-feature observation must be retrained for this model input shape.
 
 Experimental constraint defaults are false-hit rate ≤ 0.01 and recomputation rate ≤ 0.5, configured by `--false-limit` and `--recompute-limit`. False-hit rates use evaluable labeled requests; actual recomputations include forced misses. Unevaluable reuse is reported as unknown. By default, feasibility requires at least 32 evaluable labeled requests and full evaluable coverage. When the recomputation constraint is enabled, training utility excludes the explicit logged recomputation penalty, while raw environment reward remains logged.
 
