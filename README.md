@@ -68,6 +68,29 @@ Then add `"my_method": {"factory": "my_method:build", "settings": {"novelty_limi
 
 Each method gets a fresh environment, and the runner checks that request IDs and phases match across runs. Each result has exactly five measures: requests, evaluable labeled requests, false-hit rate (incorrect reuse per evaluable labeled request), recomputation rate, and mean environment reward. A null false-hit rate means no requests were evaluable. The default encoder may download on first use. The bundled trace is a synthetic smoke test.
 
+### Shared benchmark
+
+Run independently defined methods on the same environment trace:
+
+```sh
+python -m src.benchmark --settings examples/benchmark.json --methods examples/methods.json
+```
+
+The report is saved to `benchmark/results.json` by default. Use `--output path/to/report.json` to choose a different location; the destination directory is created automatically. Python's `__pycache__` directories contain compiled code, not benchmark results.
+
+The benchmark does not import or select any policy. Each entry in the methods JSON file names a `module:factory` and a settings object. The factory receives `seed` plus its settings and returns a callable that accepts only the observation and returns an environment action. Add your own factory to evaluate a new method without editing the benchmark. `src.method_adapters` contains optional wrappers for an existing policy function or a PPO checkpoint. A custom environment can be selected with `--env-factory`.
+
+For example, add a factory in `my_method.py`:
+
+```python
+def build(seed=0, novelty_limit=0.1):
+    return lambda observation: 0 if observation[1] <= novelty_limit else 1
+```
+
+Then add `"my_method": {"factory": "my_method:build", "settings": {"novelty_limit": 0.1}}` to the methods JSON. For a trained PPO model, use `"factory": "src.method_adapters:ppo_checkpoint"` with `"settings": {"checkpoint": "/path/to/best.pt"}`.
+
+Each method gets a fresh environment, and the runner checks that request IDs and phases match across runs. Each result has exactly five measures: requests, evaluable labeled requests, false-hit rate (incorrect reuse per evaluable labeled request), recomputation rate, and mean environment reward. A null false-hit rate means no requests were evaluable. The default encoder may download on first use. The bundled trace is a synthetic smoke test.
+
 ## Repository structure
 
 ```text

@@ -8,7 +8,6 @@
 | 6 | Feature ablations: remove workload drift, novelty, or recent history features one at a time | Which observations actually help PPO? |
 | 7 | Robustness: vary capacity, workload shift size, threshold, and reward/constraint settings | Does the result hold beyond one configuration? |
 | 8 | Held-out evaluation: test once on a later, distinct trace | Does the chosen policy generalize? |
-
 Stage 4 runs through `python -m src.evaluate`. The similarity-threshold
 decision rule uses a default cosine threshold of `0.90`, independent of the
 cache retrieval threshold; override it with `--decision-threshold`. The

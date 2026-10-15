@@ -4,20 +4,6 @@ import math
 import statistics
 
 
-def similarity_threshold_rule(observation, similarity_threshold=0.90):
-    """Reuse only when a cache candidate meets a policy similarity threshold.
-
-    The environment encodes a candidate's cosine similarity as novelty
-    ``(1 - similarity) / 2``. Novelty is exactly 1 when no candidate exists.
-    The policy threshold is independent of the cache's retrieval threshold.
-    """
-    if not math.isfinite(similarity_threshold) or not -1 < similarity_threshold <= 1:
-        raise ValueError("similarity_threshold must be in (-1, 1]")
-    novelty = float(observation[1])
-    similarity = 1.0 - 2.0 * novelty
-    return 0 if novelty < 1.0 and similarity >= similarity_threshold else 1
-
-
 def reuse_metrics(records):
     """Summarize status-bearing records with explicit quality denominators."""
     n = len(records)
@@ -129,6 +115,7 @@ def summarize(
             "Controller memory requires dedicated memory measurement.",
         ],
     }
+
     if include_timing:
         total_latency = list(end_to_end_latencies_ms)
         decision_latency = list(decision_latencies_ms)
