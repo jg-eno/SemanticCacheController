@@ -1,23 +1,27 @@
 # Semantic Cache Baselines
 
-This folder contains a small, reproducible baseline for semantic caching. It compares three policies using the same fixed-threshold similarity lookup:
+This folder contains the deterministic baseline policies used to evaluate a semantic-cache controller. The repository compares three policies using the same fixed-threshold similarity lookup:
 
 - `NoCacheBaseline` — always serves a fresh result and pays the full cost.
 - `LRUSemanticCache` — evicts the least recently used cached entry.
 - `LFUSemanticCache` — evicts the least frequently used cached entry.
 
-The baseline is intentionally limited to cache lookup, freshness checking, eviction, and metrics. It does not generate embeddings, call an LLM, or provide the full drift environment.
+The baseline is intentionally limited to lookup, freshness checking, eviction, and summary metrics. It does not generate embeddings, call an LLM, or provide an end-to-end drift environment.
 
 ## Folder contents
 
-- `caches.py` — shared cache logic and the three baseline policies.
-- `test_run.py` — runs the two synthetic scenarios and prints metrics.
-- `test_stub_data.py` — creates the synthetic query stream used by the runner.
+- `caches.py` — shared cache logic and the baseline policies.
+- `test_run.py` — old synthetic smoke test using the stub data generator.
+- `test_stub_data.py` — creates a simple synthetic query stream for quick sanity checks.
 - `BASELINE.md` — this guide.
 
-## How the baseline works
+## Internal cache contract
 
-Each query record must contain:
+The cache logic accepts two shapes of input records.
+
+### 1) Direct cache record
+
+This is the internal baseline format used by the cache logic itself:
 
 ```python
 {
@@ -27,6 +31,42 @@ Each query record must contain:
     "step": int,
 }
 ```
+
+Here:
+- `embedding` is the query embedding vector used in cosine similarity checks
+- `true_cost` is the fresh-serving cost on a miss
+- `content_version` tracks whether the cached answer is stale
+- `step` is a monotonically increasing counter used by LRU/LFU bookkeeping
+
+### 2) Project workload row
+
+The project dataset rows are not in this exact internal shape. They look like:
+
+```python
+{
+    "request_id": "s0-r0",
+    "intent_id": "example-capital",
+    "query": "Name France's capital.",
+    "topic_id": None,
+    "phase_id": 0,
+    "step": 0,
+}
+```
+
+The baseline adapter converts this to the internal record format by doing the following:
+
+```python
+record = {
+    "embedding": encoder.encode(record["query"]),
+    "true_cost": record.get("true_cost", default_true_cost),
+    "content_version": record.get("content_version", record.get("intent_id")),
+    "step": record["step"],
+}
+```
+
+This lets the same cache logic consume either synthetic records or project data without changing LRU/LFU behavior.
+
+## How the baseline works
 
 For every query, the cache performs the following steps:
 
@@ -66,22 +106,21 @@ If multiple entries tie on the eviction criterion, the earliest inserted entry i
 
 A stale hit is a cache hit whose cached content version differs from the current query content version. It is not counted as a miss.
 
-## Run the baseline
+## How to run the real validation path
 
-### Prerequisites
-
-Use Python 3.13 or another Python version supported by your environment. The baseline requires NumPy.
-
-From the repository root, create and activate a virtual environment if desired:
+Use the repository venv and run the actual evaluation entry points from the repo root:
 
 ```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
-python -m pip install numpy
+.\venv\Scripts\Activate.ps1
+python -m unittest discover -s src/tests -v
+python -m src.evaluate src/datasets/example_workload.jsonl --held-out src/datasets/example_held_out.jsonl
 ```
 
-### Run the sanity-check scenarios
+These are the authoritative checks for the project. They use real workload rows, not the stub stream.
+
+## How to run the synthetic stub sanity check
+
+The stub data is optional and only intended as a quick smoke test. It is not the main validation path for the project.
 
 From the repository root:
 
@@ -96,34 +135,27 @@ The runner executes two scenarios:
 
 The runner prints hit rate, stale-hit rate, and normalized API cost for `NoCache`, `LRU`, and `LFU`.
 
-### Run the tests directly
-
-You can also run the synthetic data generator and runner through Python from the baseline folder:
-
-```powershell
-cd src/baseline_models
-python test_run.py
-```
-
-The first command is recommended when running from the repository root.
-
 ### Use the cache classes in another script
 
-Import the classes from the baseline folder after adding that folder to your Python path, or run the script from the folder:
+Import the classes from the baseline folder or use the repository package path:
 
 ```python
-from caches import LRUSemanticCache, LFUSemanticCache, NoCacheBaseline
+from src.baseline_models.caches import LRUSemanticCache, LFUSemanticCache, NoCacheBaseline
 
-cache = LRUSemanticCache(capacity=50, similarity_threshold=0.85)
+cache = LRUSemanticCache(capacity=50, similarity_threshold=0.85, encoder=encoder)
 result = cache.process(record)
 print(result)
 print(cache.metrics())
 ```
 
-The `record` must use the required fields described above. The current synthetic generator can be used as a reference:
+The `record` may be either:
+- a direct cache record with `embedding`, `true_cost`, `content_version`, `step`, or
+- a project workload row with `query`, `step`, and optional metadata.
+
+The stub generator can still be used as a reference for synthetic sanity checks:
 
 ```python
-from test_stub_data import make_stub_stream
+from src.baseline_models.test_stub_data import make_stub_stream
 
 records = make_stub_stream(
     n_records=2000,
@@ -144,4 +176,4 @@ The synthetic values are only sanity-check output. They are not benchmark result
 
 ## Replace the synthetic stream
 
-To evaluate a real environment, provide records through the same `process(record)` interface. The cache code does not require knowledge of how those records were generated. A real implementation can replace `test_stub_data.py` while keeping the existing cache classes unchanged.
+To evaluate a real environment, provide records through the same `process(record)` interface. The cache code does not require knowledge of how those records were generated. A real implementation can replace the stub generator while keeping the existing cache classes unchanged.
