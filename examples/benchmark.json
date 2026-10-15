@@ -1,0 +1,5 @@
+{
+  "workload_path": "src/datasets/example_held_out.jsonl",
+  "capacity": 32,
+  "threshold": 0.85
+}

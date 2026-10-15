@@ -1,9 +1,11 @@
 """Deterministic split evaluation through environment factories and baseline callables."""
 import argparse
 from dataclasses import asdict
+import hashlib
 import json
 from pathlib import Path
 import numpy as np
+from ..evaluation_metrics import reuse_metrics
 from .config import make_env, load_factory, observation, seed_all, settings_file
 from .policy import PPO
 from .rollout import signals
@@ -22,6 +24,7 @@ def summarize(records, config):
                 mean_reward=sum(r['utility'] for r in records)/n,
                 cumulative_environment_reward=sum(r['environment_reward'] for r in records),
                 false_hit_rate=false_rate, labeled_requests=sum(r['labeled_request'] for r in records),
+                **reuse_metrics(records),
                 evaluable_labeled_requests=evaluable, unevaluable_requests=n-evaluable,
                 labeled_reuse_decisions=sum(r['status'] in ('correct', 'incorrect') for r in records),
                 unevaluable_reuse_decisions=sum(r['status'] == 'unevaluable' for r in records),
@@ -81,7 +84,8 @@ def evaluate_episode(factory, settings, policy, config, seed=0, labels=None, tra
             transitions.append(dict(step=i, phase_id=records[i]['phase'],
                 **{name: summarize(rows, config) if rows else None for name, rows in windows.items()}))
     return dict(overall=overall, phases={p: summarize(rows, config) for p, rows in phases.items()},
-                transitions=transitions, constraint_limits=dict(false_hit=config.false_limit, recomputation=config.recompute_limit))
+                transitions=transitions, constraint_limits=dict(false_hit=config.false_limit, recomputation=config.recompute_limit),
+                trace_sha256=hashlib.sha256(json.dumps([r['request_id'] for r in records], default=str).encode()).hexdigest())
 
 
 def aggregate(reports):

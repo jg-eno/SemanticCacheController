@@ -4,3 +4,4 @@ src/datasets/dataset.ipynb
 
 # Local internal algorithm documentation
 /docs/private_algorithm.md
+/benchmark/results.json

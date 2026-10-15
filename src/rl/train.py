@@ -12,6 +12,7 @@ from .config import Config, FEATURE_NAMES, make_env, seed_all, settings_file
 from .policy import PPO
 from .rollout import Collector
 from .evaluate import evaluate_episode, load_labels
+from ..evaluation_metrics import reuse_metrics
 
 
 def feasible(report, config):
@@ -67,6 +68,7 @@ def train(factory, train_settings, validation_settings, output, config=None, tra
                         false_multiplier=float(agent.multipliers.values[0]), recompute_multiplier=float(agent.multipliers.values[1]),
                         false_constraint_violation=max(0, rates[0]-config.false_limit) if rates[0] is not None else None,
                         recompute_constraint_violation=max(0, rates[1]-config.recompute_limit))
+            dual.update(reuse_metrics(records))
             metadata['multiplier_history'].append(dual)
             metadata['steps'] = steps
             # Always preserve rate/dual estimates; loss/episode reporting has its own interval.
