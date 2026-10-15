@@ -1,0 +1,14 @@
+{
+  "always_reuse": {
+    "factory": "src.method_adapters:callable_method",
+    "settings": {"spec": "src.evaluate:always_reuse"}
+  },
+  "always_recompute": {
+    "factory": "src.method_adapters:callable_method",
+    "settings": {"spec": "src.evaluate:always_recompute"}
+  },
+  "drift_rule": {
+    "factory": "src.method_adapters:callable_method",
+    "settings": {"spec": "src.evaluate:drift_rule"}
+  }
+}

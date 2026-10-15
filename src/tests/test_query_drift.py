@@ -38,7 +38,7 @@ class Tests(unittest.TestCase):
 
     def test_retrieval_and_fifo(self):
         cache = FIFOCache(2)
-        cache.admit('a', [1, 0], 'response', 'A')
+        cache.admit('a', [1, 0], 'response')
         self.assertEqual(cache.lookup([0.99, 0.1])[0].response, 'response')
         self.assertIsNone(cache.lookup([0, 1])[0])
         self.assertAlmostEqual(cosine([2, 0], [1, 0]), 1)
@@ -50,7 +50,7 @@ class Tests(unittest.TestCase):
         cache.lookup([1, 0])
         cache.admit('c', [-1, 0], 'c')
         self.assertEqual([e.query for e in cache.entries], ['b', 'c'])
-        self.assertEqual([e.insertion_order for e in cache.entries], [1, 2])
+        self.assertEqual([e.response for e in cache.entries], ['b', 'c'])
 
     def test_observations_actions_rewards(self):
         env = SemanticCacheEnv(workload(), Encoder(), capacity=2)
@@ -105,7 +105,10 @@ class Tests(unittest.TestCase):
         env.step(1)
         _, _, _, _, info = env.step(1)
         self.assertTrue(info['cache_hit'])
-        self.assertEqual(env.cache.entries[0].insertion_order, 1)
+        self.assertEqual(env.cached_intents[env.cache.entries[0]], 'A')
+        self.assertEqual(set(env.cached_intents), set(env.cache.entries))
+        self.assertFalse(hasattr(env.cache.entries[0], 'intent_id'))
+        self.assertFalse(hasattr(env.cache.entries[0], 'source_request_id'))
         self.assertEqual(env.recompute_count, 2)
 
     def test_invalid_configuration(self):

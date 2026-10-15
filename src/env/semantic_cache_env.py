@@ -60,6 +60,7 @@ class SemanticCacheEnv(gym.Env):
         if options:
             raise ValueError('No reset options are supported')
         self.cache = FIFOCache(self.capacity, self.threshold)
+        self.cached_intents = {}
         self.drift_detector = ProjectionHistogramDrift(**self.drift_config)
         self.history = deque(maxlen=2 * self.drift_detector.window - 1)
         self.misses, self.reuses = deque(maxlen=self.window), deque(maxlen=self.window)
@@ -91,12 +92,16 @@ class SemanticCacheEnv(gym.Env):
         drift = dict(zip(FEATURE_NAMES, map(float, self.observation)))
         if reuse:
             response = self.candidate.response
-            incoming, cached = row['intent_id'], self.candidate.intent_id
+            incoming = row['intent_id']
+            cached = self.cached_intents[self.candidate]
             status = 'unevaluable' if incoming is None or cached is None else 'correct' if incoming == cached else 'incorrect'
             self.reuse_count += 1
         else:
             response = self.response_provider({k: v for k, v in row.items() if k != 'intent_id'})
-            self.cache.admit(row['query'], self.embedding, response, row['intent_id'])
+            entry, evicted = self.cache.admit(row['query'], self.embedding, response)
+            if evicted is not None:
+                del self.cached_intents[evicted]
+            self.cached_intents[entry] = row['intent_id']
             self.recompute_count += 1
         components = self.rewards.components(status, not reuse)
         self.history.append(self.embedding.copy())
@@ -107,7 +112,8 @@ class SemanticCacheEnv(gym.Env):
                     reuse_count=self.reuse_count, recompute_count=self.recompute_count,
                     reward_components=components, cache_occupancy=len(self.cache.entries) / self.capacity,
                     query_drift_features=drift, response=response, request_id=row['request_id'],
-                    phase_id=row['phase_id'], step=row['step'])
+                    phase_id=row['phase_id'], step=row['step'],
+                    labeled_request=row['intent_id'] is not None)
         self.index += 1
         self.done = self.index == len(self.workload)
         if self.done:
