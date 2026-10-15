@@ -1,18 +1,20 @@
 # Semantic Cache Baselines
 
-This folder contains the deterministic baseline policies used to evaluate a semantic-cache controller. The repository compares three policies using the same fixed-threshold similarity lookup:
+This folder contains deterministic cache-policy baselines using fixed-threshold similarity lookup:
 
 - `NoCacheBaseline` — always serves a fresh result and pays the full cost.
+- `FIFOSemanticCache` — evicts the oldest inserted entry.
+- `LIFOSemanticCache` — evicts the newest inserted entry.
 - `LRUSemanticCache` — evicts the least recently used cached entry.
 - `LFUSemanticCache` — evicts the least frequently used cached entry.
 
-The baseline is intentionally limited to lookup, freshness checking, eviction, and summary metrics. It does not generate embeddings, call an LLM, or provide an end-to-end drift environment.
+These classes provide standalone lookup, reuse-quality, eviction, and summary-metric simulation. They do not call an LLM. They are separate from the shared environment benchmark: `src.benchmark` evaluates observation-to-action methods in `SemanticCacheEnv`, whose cache currently uses FIFO eviction. Its methods JSON cannot select these baseline cache classes as eviction policies.
 
 ## Folder contents
 
 - `caches.py` — shared cache logic and the baseline policies.
-- `test_run.py` — old synthetic smoke test using the stub data generator.
-- `test_stub_data.py` — creates a simple synthetic query stream for quick sanity checks.
+- `evaluate_workload.py` — evaluates all five cache baselines on workload JSONL rows.
+- `test_run.py` and `test_stub_data.py` — optional synthetic smoke-test runner and data generator; not benchmark evidence.
 - `BASELINE.md` — this guide.
 
 ## Internal cache contract
@@ -53,18 +55,9 @@ The project dataset rows are not in this exact internal shape. They look like:
 }
 ```
 
-The baseline adapter converts this to the internal record format by doing the following:
+The cache adapter converts this to the internal record format. It encodes `query`, uses `true_cost` or the configured default, and preserves the optional `content_version` and `intent_id` fields. A missing `content_version` stays unknown; it is not inferred from `intent_id` because intent labels identify query equivalence, not answer freshness.
 
-```python
-record = {
-    "embedding": encoder.encode(record["query"]),
-    "true_cost": record.get("true_cost", default_true_cost),
-    "content_version": record.get("content_version", record.get("intent_id")),
-    "step": record["step"],
-}
-```
-
-This lets the same cache logic consume either synthetic records or project data without changing LRU/LFU behavior.
+This lets the same cache logic consume either synthetic records or project workload rows without changing the eviction behavior.
 
 ## How the baseline works
 
@@ -77,7 +70,7 @@ For every query, the cache performs the following steps:
 5. On a miss, pay the query's `true_cost` and insert the result into the cache.
 6. Evict an entry according to the selected policy when the cache is full.
 
-The default similarity threshold is `0.85`, and the default capacity is `50` entries. The default `NoCacheBaseline` does not use either value.
+The default similarity threshold is `0.85`, and the default capacity is `32` entries. `evaluate_workload.py` uses the same defaults. `NoCacheBaseline` does not use either value.
 
 ### Cache policies
 
@@ -101,26 +94,29 @@ If multiple entries tie on the eviction criterion, the earliest inserted entry i
 
 - `n_queries` — number of processed records.
 - `hit_rate` — cache hits divided by total queries.
-- `stale_hit_rate` — stale hits divided by all cache hits.
+- `stale_hit_rate` — known stale hits divided by all cache hits. Without explicit content versions, staleness cannot be determined and no stale hits are countezd; a reported `0.0` does not establish that answers were fresh.
 - `normalized_api_cost` — actual cost divided by the cost of processing every query without a cache.
+- `false_hit_rate` — incorrect reuse divided by evaluable labeled requests. A `null` value means no request could be evaluated.
+- `recomputation_rate` — requests recomputed divided by all requests.
+- `evaluable_requests`, `correct_reuse_count`, `incorrect_reuse_count`, and `unevaluable_reuse_count` — reuse-quality counts.
 
 A stale hit is a cache hit whose cached content version differs from the current query content version. It is not counted as a miss.
 
 ## How to run the real validation path
 
-Use the repository venv and run the actual evaluation entry points from the repo root:
+From the repository root, use the repository virtual environment to evaluate these cache classes on workload rows:
 
 ```powershell
 .\venv\Scripts\Activate.ps1
-python -m unittest discover -s src/tests -v
-python -m src.evaluate src/datasets/example_workload.jsonl --held-out src/datasets/example_held_out.jsonl
+python -m src.baseline_models.evaluate_workload src/datasets/example_workload.jsonl --held-out src/datasets/example_held_out.jsonl
+python -m unittest src.tests.test_baseline_caches -v
 ```
 
-These are the authoritative checks for the project. They use real workload rows, not the stub stream.
+The evaluator prints metrics for `NoCacheBaseline`, FIFO, LIFO, LRU, and LFU on the workload and optional held-out workload. The default sentence encoder may download its model on first use. `python -m src.evaluate` evaluates action policies in the Gymnasium environment; it does not run these five cache classes. The shared benchmark in `src.benchmark` also evaluates action methods, and currently runs them against the environment's FIFO cache. Use that benchmark for action-policy comparisons, not as a direct LRU/LFU comparison.
 
 ## How to run the synthetic stub sanity check
 
-The stub data is optional and only intended as a quick smoke test. It is not the main validation path for the project.
+The stub data is optional and only intended as a quick smoke test of the standalone cache logic. It is not the workload evaluator or shared benchmark.
 
 From the repository root:
 
@@ -174,6 +170,6 @@ records = make_stub_stream(
 
 The synthetic values are only sanity-check output. They are not benchmark results and should not be used as evidence about a real embedding model, workload, or API cost model.
 
-## Replace the synthetic stream
+## Input boundary
 
-To evaluate a real environment, provide records through the same `process(record)` interface. The cache code does not require knowledge of how those records were generated. A real implementation can replace the stub generator while keeping the existing cache classes unchanged.
+The standalone cache classes accept direct cache records or project workload rows through `process(record)`. They do not consume Gymnasium observations or actions. The shared benchmark uses the environment's own cache implementation, so comparing these eviction policies within that benchmark requires making the environment's eviction policy configurable and running each policy on the same workload and settings.

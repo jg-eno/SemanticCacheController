@@ -5,6 +5,12 @@ import gymnasium as gym
 from gymnasium import spaces
 import numpy as np
 from ..models.semantic_cache import FIFOCache, SentenceEncoder, unit
+from ..baseline_models.caches import (
+    FIFOSemanticCache,
+    LIFOSemanticCache,
+    LRUSemanticCache,
+    LFUSemanticCache,
+)
 from ..datasets.workload import validate
 from ..models.query_drift import ProjectionHistogramDrift
 
@@ -34,14 +40,32 @@ class Rewards:
 
 class SemanticCacheEnv(gym.Env):
     metadata = {'render_modes': []}
-
     def __init__(self, workload, encoder=None, capacity=32, threshold=0.85, window=16,
                  rewards=None, response_provider=None, drift_window=16,
-                 projection_count=8, histogram_bins=8, projection_seed=0):
+                 projection_count=8, histogram_bins=8, projection_seed=0,
+                 cache_policy='fifo'):
+
         validate(workload)
         if not isinstance(window, int) or isinstance(window, bool) or window < 1:
             raise ValueError('window must be a positive integer')
+        cache_classes = {
+            'fifo': FIFOCache,
+            'lifo': LIFOSemanticCache,
+            'lru': LRUSemanticCache,
+            'lfu': LFUSemanticCache,
+        }
+
+        if cache_policy not in cache_classes:
+            raise ValueError(
+                f"Unknown cache_policy {cache_policy!r}. "
+                f"Choose from {list(cache_classes)}."
+            )
+
+        # Retain the original cache's capacity and threshold validation.
         FIFOCache(capacity, threshold)
+
+        self.cache_class = cache_classes[cache_policy]
+        self.cache_policy = cache_policy
         self.drift_config = dict(window=drift_window, projections=projection_count,
                                  bins=histogram_bins, seed=projection_seed)
         ProjectionHistogramDrift(**self.drift_config)
@@ -59,7 +83,14 @@ class SemanticCacheEnv(gym.Env):
         super().reset(seed=seed)
         if options:
             raise ValueError('No reset options are supported')
-        self.cache = FIFOCache(self.capacity, self.threshold)
+        if self.cache_policy == 'fifo':
+            self.cache = FIFOCache(self.capacity, self.threshold)
+        else:
+            self.cache = self.cache_class(
+                capacity=self.capacity,
+                similarity_threshold=self.threshold,
+            )
+
         self.cached_intents = {}
         self.drift_detector = ProjectionHistogramDrift(**self.drift_config)
         self.history = deque(maxlen=2 * self.drift_detector.window - 1)
@@ -92,13 +123,28 @@ class SemanticCacheEnv(gym.Env):
         drift = dict(zip(FEATURE_NAMES, map(float, self.observation)))
         if reuse:
             response = self.candidate.response
+            if self.cache_policy != 'fifo':
+                self.cache.record_reuse(self.candidate, row['step'])
             incoming = row['intent_id']
             cached = self.cached_intents[self.candidate]
             status = 'unevaluable' if incoming is None or cached is None else 'correct' if incoming == cached else 'incorrect'
             self.reuse_count += 1
         else:
             response = self.response_provider({k: v for k, v in row.items() if k != 'intent_id'})
-            entry, evicted = self.cache.admit(row['query'], self.embedding, response)
+            
+            if self.cache_policy == 'fifo':
+                entry, evicted = self.cache.admit(
+                    row['query'], self.embedding, response
+                )
+            else:
+                entry, evicted = self.cache.admit(
+                    row['query'],
+                    self.embedding,
+                    response,
+                    step=row['step'],
+                    intent_id=row['intent_id'],
+                )
+
             if evicted is not None:
                 del self.cached_intents[evicted]
             self.cached_intents[entry] = row['intent_id']

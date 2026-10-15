@@ -1,0 +1,30 @@
+{
+  "FIFO": {
+    "factory": "src.baseline_models.benchmark_methods:make_fixed_threshold_method",
+    "settings": {},
+    "env_settings": {
+      "cache_policy": "fifo"
+    }
+  },
+  "LIFO": {
+    "factory": "src.baseline_models.benchmark_methods:make_fixed_threshold_method",
+    "settings": {},
+    "env_settings": {
+      "cache_policy": "lifo"
+    }
+  },
+  "LRU": {
+    "factory": "src.baseline_models.benchmark_methods:make_fixed_threshold_method",
+    "settings": {},
+    "env_settings": {
+      "cache_policy": "lru"
+    }
+  },
+  "LFU": {
+    "factory": "src.baseline_models.benchmark_methods:make_fixed_threshold_method",
+    "settings": {},
+    "env_settings": {
+      "cache_policy": "lfu"
+    }
+  }
+}

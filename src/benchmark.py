@@ -36,13 +36,19 @@ def make_method(spec, seed):
     if callable(spec):
         method = spec(seed=seed)
     else:
-        if not isinstance(spec, dict) or set(spec) != {'factory', 'settings'}:
+        if not isinstance(spec, dict):
+            raise ValueError('Each method must be a dictionary')
+        if not {'factory', 'settings'} <= set(spec):
             raise ValueError('Each method needs factory and settings fields')
+        if set(spec) - {'factory', 'settings', 'env_settings'}:
+            raise ValueError('Unexpected method configuration field')
         if not isinstance(spec['settings'], dict):
             raise ValueError('Method settings must be a JSON object')
+        if 'env_settings' in spec and not isinstance(spec['env_settings'], dict):
+            raise ValueError('env_settings must be a JSON object')
         method = load_callable(spec['factory'])(seed=seed, **spec['settings'])
-    if not callable(method):
-        raise ValueError('Method factory must return a callable taking one observation')
+    if not callable(method) and not callable(getattr(method, "select_action", None)):
+        raise ValueError('Method factory must return a callable or an object with select_action()')
     return method
 
 
@@ -98,7 +104,12 @@ def evaluate_method(env_factory, env_settings, method, seed=0, labels=None,
     try:
         obs, _ = env.reset(seed=seed)
         for _ in range(max_episode_steps):
-            action = method(obs.copy() if hasattr(obs, 'copy') else obs)
+            # Pass the current environment to methods that need cache state.
+            if hasattr(method, "select_action"):
+                action = method.select_action(obs.copy(), env)
+            else:
+                action = method(obs.copy() if hasattr(obs, 'copy') else obs)
+
             obs, reward, terminated, truncated, info = env.step(action)
             records.append(step_record(reward, info, labels))
             if terminated or truncated:
@@ -108,7 +119,10 @@ def evaluate_method(env_factory, env_settings, method, seed=0, labels=None,
     finally:
         env.close()
     trace = [(r['request_id'], r['phase_id']) for r in records]
-    digest = hashlib.sha256(json.dumps(trace, default=str).encode()).hexdigest()
+    digest = hashlib.sha256(
+        json.dumps(trace, default=str).encode()
+    ).hexdigest()
+
     return summarize(records), digest
 
 
@@ -123,19 +137,30 @@ def benchmark(env_factory, env_settings, methods, seed=0, labels=None,
         raise ValueError('max_episode_steps must be a positive integer')
     results = {}
     trace_digest = None
+    method_env_settings = {}
     for name, spec in methods.items():
         random.seed(seed)
         np.random.seed(seed)
         method = make_method(spec, seed)
-        summary, digest = evaluate_method(env_factory, env_settings, method, seed, labels,
-                                          max_episode_steps)
+
+        current_settings = dict(env_settings)
+        if isinstance(spec, dict):
+            overrides = spec.get('env_settings', {})
+            current_settings.update(overrides)
+
+        method_env_settings[name] = current_settings
+
+        summary, digest = evaluate_method(env_factory,current_settings,method,seed,
+            labels,max_episode_steps,)
         if trace_digest is None:
             trace_digest = digest
         elif digest != trace_digest:
             raise ValueError('Methods did not evaluate the same request trace')
         results[name] = summary
-    return dict(seed=seed, settings=env_settings, trace_sha256=trace_digest, results=results,
-                limitation='Offline simulation; intent labels are a proxy for answer correctness.')
+    
+    return dict(seed=seed, settings=env_settings, method_env_settings=method_env_settings,
+        trace_sha256=trace_digest, results=results,
+        limitation='Offline simulation; intent labels are a proxy for answer correctness.',)
 
 
 def load_json_object(path):

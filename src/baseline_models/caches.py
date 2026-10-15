@@ -46,14 +46,17 @@ from typing import Dict
 import numpy as np
 
 
-@dataclass
+
+@dataclass(eq=False)
 class CacheEntry:
     embedding: np.ndarray
-    cached_content_version: object   # opaque id; only compared for equality, D1
+    cached_content_version: object
     cost_at_cache_time: float
-    last_used_step: int = 0     # for LRU
-    hit_count: int = 0          # for LFU
-    intent_id: object = None    # source label of the request that filled this entry (None = unlabeled)
+    last_used_step: int = 0
+    hit_count: int = 0
+    intent_id: object = None
+    query: str = ""
+    response: object = None
 
 
 def cosine_sim(a: np.ndarray, b: np.ndarray) -> float:
@@ -215,6 +218,54 @@ class SemanticCacheBaseline:
             intent_id=intent,
         )
         return "miss", best_sim
+
+    
+    def lookup(self, embedding):
+        """Find the best matching entry without updating usage statistics."""
+        best_key, best_sim = self._find_best_match(embedding)
+
+        if best_key is None or best_sim < self.threshold:
+            return None, None
+
+        return self.entries[best_key], best_sim
+
+    
+    def admit(self, query, embedding, response, step=0, intent_id=None):
+        """Insert a fresh response and return both the new and evicted entries."""
+        embedding = np.asarray(embedding, dtype=np.float64)
+
+        evicted = None
+        if len(self.entries) >= self.capacity:
+            victim_key = self._choose_eviction_victim()
+            evicted = self.entries.pop(victim_key)
+
+        key = self._next_key
+        self._next_key += 1
+
+        entry = CacheEntry(
+            embedding=embedding,
+            cached_content_version=None,
+            cost_at_cache_time=self.default_true_cost,
+            last_used_step=step,
+            hit_count=0,
+            intent_id=intent_id,
+            query=query,
+            response=response,
+        )
+        self.entries[key] = entry
+
+        return entry, evicted
+
+
+    def record_reuse(self, entry, step):
+        """Update recency/frequency after the environment actually reuses an entry."""
+        for key, cached_entry in self.entries.items():
+            if cached_entry is entry:
+                self._on_hit_update(key, step)
+                return
+
+        raise ValueError("Cannot record reuse: entry is no longer in the cache")
+
 
     # ---- reporting ----------------------------------------------------------
 
