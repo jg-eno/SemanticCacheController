@@ -14,7 +14,6 @@ def reuse_metrics(records):
     incorrect = sum(record["status"] == "incorrect" for record in records)
     served = sum(record["status"] != "not_reused" for record in records)
     evaluable_served = correct + incorrect
-
     return {
         "served_hit_rate": served / n,
         "quality_adjusted_hit_rate": correct / n,
@@ -70,7 +69,6 @@ def summarize(
 
     end_to_end_latencies_ms = end_to_end_latencies_ms or []
     decision_latencies_ms = decision_latencies_ms or []
-
     served_hits = [
         record for record in records
         if record.get("effective_action") == 0
