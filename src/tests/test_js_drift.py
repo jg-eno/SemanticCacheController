@@ -70,9 +70,9 @@ class JSDriftTests(unittest.TestCase):
         report = compare(rows, Encoder(), drift_window=1)
         self.assertEqual(report, compare(rows, Encoder(), drift_window=1))
         self.assertEqual(report['always_reuse']['phase_transitions'][0]['mean_shift_after'], 0.5)
-        self.assertEqual(drift_rule(np.array([0.05, 0.03, 0, 0, 1, 1])), 0)
-        self.assertEqual(drift_rule(np.array([0.2, 0.03, 0, 0, 1, 1])), 1)
-        self.assertEqual(drift_rule(np.array([0.2, 0.03, 0, 0, 1, 1]), shift_threshold=0.3), 0)
+        self.assertEqual(drift_rule(np.array([0.05, 0.03, 0, 0, 1])), 0)
+        self.assertEqual(drift_rule(np.array([0.2, 0.03, 0, 0, 1])), 1)
+        self.assertEqual(drift_rule(np.array([0.2, 0.03, 0, 0, 1]), shift_threshold=0.3), 0)
 
 
 if __name__ == '__main__':

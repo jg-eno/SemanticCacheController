@@ -19,12 +19,12 @@ class TinyCacheEnv(gym.Env):
     def __init__(self, split='train', labels=True, emit_flag=True, length=8):
         self.split, self.labels, self.emit_flag, self.length = split, labels, emit_flag, length
         self.action_space = spaces.Discrete(2)
-        self.observation_space = spaces.Box(0, 1, (6,), np.float32)
+        self.observation_space = spaces.Box(0, 1, (5,), np.float32)
         self.index = 0
 
     def obs(self):
         shifted = self.index >= self.length//2
-        return np.array([float(shifted), float(self.index % 4 == 0), 0.25, 0.5, 0.5, 1], dtype=np.float32)
+        return np.array([float(shifted), float(self.index % 4 == 0), 0.25, 0.5, 0.5], dtype=np.float32)
 
     def reset(self, *, seed=None, options=None):
         super().reset(seed=seed)
@@ -75,18 +75,18 @@ class PPOTests(unittest.TestCase):
     def test_actor_shape_distribution_actions_and_labels(self):
         seed_all(9)
         model = ActorCritics(8)
-        dist = model.distribution(torch.zeros(5, 6))
+        dist = model.distribution(torch.zeros(5, 5))
         self.assertEqual(dist.probs.shape, (5, 2))
         torch.testing.assert_close(dist.probs.sum(-1), torch.ones(5))
-        self.assertEqual(model.values(torch.zeros(5, 6)).shape, (5, 3))
-        obs = np.zeros(6, np.float32)
+        self.assertEqual(model.values(torch.zeros(5, 5)).shape, (5, 3))
+        obs = np.zeros(5, np.float32)
         for _ in range(20): self.assertIn(model.action(obs)[0], (0, 1))
         with self.assertRaises(ValueError): observation(np.zeros(7, np.float32))
-        with self.assertRaises(ValueError): observation(np.zeros(6, np.float64))
-        with self.assertRaises(ValueError): model.distribution(torch.zeros(2, 7))
+        with self.assertRaises(ValueError): observation(np.zeros(5, np.float64))
+        with self.assertRaises(ValueError): model.distribution(torch.zeros(2, 6))
         env = TinyCacheEnv()
         batch, _, _ = Collector(env, PPO(short_config()), short_config()).collect(4)
-        self.assertEqual(batch['observations'].shape, (4, 6))
+        self.assertEqual(batch['observations'].shape, (4, 5))
         self.assertNotIn('intent_id', batch)
 
     def test_separate_returns_and_boundaries(self):
@@ -176,7 +176,7 @@ class PPOTests(unittest.TestCase):
             loaded, loaded_meta = PPO.load(Path(tmp)/'one/final.pt')
             self.assertEqual(loaded_meta['steps'], 64)
             np.testing.assert_equal(loaded.multipliers.values, one.multipliers.values)
-            obs = np.zeros(6, np.float32)
+            obs = np.zeros(5, np.float32)
             self.assertEqual(loaded.model.action(obs, True)[0], one.model.action(obs, True)[0])
             baseline = {'always_reuse': reuse, 'always_recompute': recompute, 'drift_rule': drift}
             reports = compare(factory, {'split': 'held_out'}, loaded, baseline, [0, 1])

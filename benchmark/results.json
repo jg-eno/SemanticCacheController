@@ -1,0 +1,34 @@
+{
+  "seed": 0,
+  "settings": {
+    "workload_path": "src/datasets/example_held_out.jsonl",
+    "capacity": 32,
+    "threshold": 0.85
+  },
+  "trace_sha256": "68b5a2b63ad406fe20cf39217dd3ee2cbf5de9294810e1c596bb74caef96767d",
+  "results": {
+    "always_reuse": {
+      "requests": 96,
+      "evaluable_labeled_requests": 96,
+      
+      "false_hit_rate": 0.0,
+      "recomputation_rate": 0.041666666666666664,
+      "mean_environment_reward": 0.9500000000000001
+    },
+    "always_recompute": {
+      "requests": 96,
+      "evaluable_labeled_requests": 96,
+      "false_hit_rate": 0.0,
+      "recomputation_rate": 1.0,
+      "mean_environment_reward": -0.20000000000000004
+    },
+    "drift_rule": {
+      "requests": 96,
+      "evaluable_labeled_requests": 96,
+      "false_hit_rate": 0.0,
+      "recomputation_rate": 0.28125,
+      "mean_environment_reward": 0.6625
+    }
+  },
+  "limitation": "Offline simulation; intent labels are a proxy for answer correctness."
+}

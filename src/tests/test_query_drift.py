@@ -56,14 +56,14 @@ class Tests(unittest.TestCase):
         env = SemanticCacheEnv(workload(), Encoder(), capacity=2)
         obs, _ = env.reset(seed=3)
         self.assertEqual(FEATURE_NAMES, ('query_embedding_shift', 'query_novelty', 'recent_cache_miss_rate',
-                                      'recent_reuse_rate', 'cache_occupancy', 'budget_remaining'))
-        np.testing.assert_equal(obs, [0, 1, 0, 0, 0, 1])
+                                      'recent_reuse_rate', 'cache_occupancy'))
+        np.testing.assert_equal(obs, [0, 1, 0, 0, 0])
         obs, reward, end, trunc, info = env.step(0)
         self.assertTrue(info['forced_recomputation'])
         self.assertEqual(info['effective_action'], 1)
         self.assertEqual(reward, -0.2)
         self.assertEqual(info['reward_components']['recompute_cost'], -0.2)
-        self.assertEqual(obs.shape, (6,))
+        self.assertEqual(obs.shape, (5,))
         self.assertEqual(obs.dtype, np.float32)
         self.assertTrue(env.observation_space.contains(obs))
         self.assertEqual(float(obs[0]), 0)  # Full drift windows are not yet available.
@@ -76,7 +76,7 @@ class Tests(unittest.TestCase):
         obs, _, end, trunc, _ = env.step(1)
         self.assertTrue(end)
         self.assertFalse(trunc)
-        np.testing.assert_equal(obs, np.zeros(6))
+        np.testing.assert_equal(obs, np.zeros(5))
         with self.assertRaises(RuntimeError): env.step(0)
         env.reset(seed=3)
         self.assertEqual(env.recompute_count, 0)
@@ -127,7 +127,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(report['always_reuse']['forced_recomputation_count'], 0)
         self.assertEqual(report['always_reuse']['cache_hit_rate'], 1/3)
         self.assertEqual(len(report['always_reuse']['phase_transitions']), 1)
-        self.assertEqual(drift_rule(np.array([0.5, 0, 0, 0, 1, 1])), 1)
+        self.assertEqual(drift_rule(np.array([0.5, 0, 0, 0, 1])), 1)
 
     def test_additional_data(self):
         rows = wildchat_rows([dict(timestamp=1, conversation_id='x', conversation=[dict(role='user', content='a')])])
