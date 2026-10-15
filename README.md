@@ -39,11 +39,11 @@ env.close()
 Compare the deterministic baselines on the example and held-out workloads:
 
 ```sh
-python -m src.evaluate src/datasets/example_workload.jsonl --held-out src/datasets/example_held_out.jsonl
+python -m src.evaluate --workload src/datasets/example_workload.jsonl
 python -m unittest discover -s src/tests -v
 ```
 
-The bundled workloads are synthetic examples. Default tests run without downloading datasets or embedding models. Use `python -m src.evaluate --help` and `python -m src.datasets.workload --help` for available commands and configuration.
+The bundled workloads are synthetic examples. If `--workload` is omitted, evaluation uses `src/datasets/example_workload.jsonl`. Default tests run without downloading datasets or embedding models. Use `python -m src.evaluate --help` and `python -m src.datasets.workload --help` for available commands and configuration.
 
 ### Shared benchmark
 

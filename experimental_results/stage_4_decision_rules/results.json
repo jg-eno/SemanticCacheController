@@ -1,0 +1,202 @@
+{
+  "always_reuse": {
+    "total_reward": 91.2,
+    "mean_reward": 0.9500000000000001,
+    "cache_hit_rate": 0.9583333333333334,
+    "cache_miss_rate": 0.041666666666666664,
+    "correct_reuse_count": 92,
+    "incorrect_reuse_count": 0,
+    "unevaluable_reuse_count": 0,
+    "reuse_count": 92,
+    "recompute_count": 4,
+    "forced_recomputation_count": 0,
+    "average_cache_occupancy": 0.09765625,
+    "phase_transitions": [
+      {
+        "step": 32,
+        "phase_id": 1,
+        "mean_shift_before": 0.030698520441850025,
+        "mean_shift_after": 0.12702485918998718
+      },
+      {
+        "step": 64,
+        "phase_id": 2,
+        "mean_shift_before": 0.016131893421212833,
+        "mean_shift_after": 0.03907542551557223
+      }
+    ],
+    "evaluation_metrics": {
+      "query_count": 96,
+      "semantic_hit_rate": 0.9583333333333334,
+      "served_hit_rate": 0.9583333333333334,
+      "quality_adjusted_hit_rate": 0.9583333333333334,
+      "hit_precision": 1.0,
+      "false_hit_rate": 0.0,
+      "unevaluable_hit_rate": 0.0,
+      "stale_hit_rate": null,
+      "cost_per_query": null,
+      "no_cache_cost_per_query": null,
+      "relative_cost": null,
+      "cost_savings": null,
+      "controller_memory_bytes": null,
+      "net_benefit_after_controller": null,
+      "limitations": [
+        "Latency measures local policy and environment execution time.",
+        "Intent-label correctness is not independent response validation.",
+        "Staleness requires freshness ground truth.",
+        "Cost and net benefit require an explicit cost model.",
+        "Controller memory requires dedicated memory measurement."
+      ]
+    }
+  },
+  "always_recompute": {
+    "total_reward": -19.200000000000003,
+    "mean_reward": -0.20000000000000004,
+    "cache_hit_rate": 0.9583333333333334,
+    "cache_miss_rate": 0.041666666666666664,
+    "correct_reuse_count": 0,
+    "incorrect_reuse_count": 0,
+    "unevaluable_reuse_count": 0,
+    "reuse_count": 0,
+    "recompute_count": 96,
+    "forced_recomputation_count": 0,
+    "average_cache_occupancy": 0.8385416666666666,
+    "phase_transitions": [
+      {
+        "step": 32,
+        "phase_id": 1,
+        "mean_shift_before": 0.030698520441850025,
+        "mean_shift_after": 0.12702485918998718
+      },
+      {
+        "step": 64,
+        "phase_id": 2,
+        "mean_shift_before": 0.016131893421212833,
+        "mean_shift_after": 0.03907542551557223
+      }
+    ],
+    "evaluation_metrics": {
+      "query_count": 96,
+      "semantic_hit_rate": 0.9583333333333334,
+      "served_hit_rate": 0.0,
+      "quality_adjusted_hit_rate": 0.0,
+      "hit_precision": null,
+      "false_hit_rate": null,
+      "unevaluable_hit_rate": null,
+      "stale_hit_rate": null,
+      "cost_per_query": null,
+      "no_cache_cost_per_query": null,
+      "relative_cost": null,
+      "cost_savings": null,
+      "controller_memory_bytes": null,
+      "net_benefit_after_controller": null,
+      "limitations": [
+        "Latency measures local policy and environment execution time.",
+        "Intent-label correctness is not independent response validation.",
+        "Staleness requires freshness ground truth.",
+        "Cost and net benefit require an explicit cost model.",
+        "Controller memory requires dedicated memory measurement."
+      ]
+    }
+  },
+  "similarity_threshold": {
+    "total_reward": 90.0,
+    "mean_reward": 0.9375,
+    "cache_hit_rate": 0.9583333333333334,
+    "cache_miss_rate": 0.041666666666666664,
+    "correct_reuse_count": 91,
+    "incorrect_reuse_count": 0,
+    "unevaluable_reuse_count": 0,
+    "reuse_count": 91,
+    "recompute_count": 5,
+    "forced_recomputation_count": 0,
+    "average_cache_occupancy": 0.12858072916666666,
+    "phase_transitions": [
+      {
+        "step": 32,
+        "phase_id": 1,
+        "mean_shift_before": 0.030698520441850025,
+        "mean_shift_after": 0.12702485918998718
+      },
+      {
+        "step": 64,
+        "phase_id": 2,
+        "mean_shift_before": 0.016131893421212833,
+        "mean_shift_after": 0.03907542551557223
+      }
+    ],
+    "evaluation_metrics": {
+      "query_count": 96,
+      "semantic_hit_rate": 0.9583333333333334,
+      "served_hit_rate": 0.9479166666666666,
+      "quality_adjusted_hit_rate": 0.9479166666666666,
+      "hit_precision": 1.0,
+      "false_hit_rate": 0.0,
+      "unevaluable_hit_rate": 0.0,
+      "stale_hit_rate": null,
+      "cost_per_query": null,
+      "no_cache_cost_per_query": null,
+      "relative_cost": null,
+      "cost_savings": null,
+      "controller_memory_bytes": null,
+      "net_benefit_after_controller": null,
+      "limitations": [
+        "Latency measures local policy and environment execution time.",
+        "Intent-label correctness is not independent response validation.",
+        "Staleness requires freshness ground truth.",
+        "Cost and net benefit require an explicit cost model.",
+        "Controller memory requires dedicated memory measurement."
+      ]
+    }
+  },
+  "drift_rule": {
+    "total_reward": 60.0,
+    "mean_reward": 0.625,
+    "cache_hit_rate": 0.9583333333333334,
+    "cache_miss_rate": 0.041666666666666664,
+    "correct_reuse_count": 66,
+    "incorrect_reuse_count": 0,
+    "unevaluable_reuse_count": 0,
+    "reuse_count": 66,
+    "recompute_count": 30,
+    "forced_recomputation_count": 0,
+    "average_cache_occupancy": 0.357421875,
+    "phase_transitions": [
+      {
+        "step": 32,
+        "phase_id": 1,
+        "mean_shift_before": 0.030698520441850025,
+        "mean_shift_after": 0.12702485918998718
+      },
+      {
+        "step": 64,
+        "phase_id": 2,
+        "mean_shift_before": 0.016131893421212833,
+        "mean_shift_after": 0.03907542551557223
+      }
+    ],
+    "evaluation_metrics": {
+      "query_count": 96,
+      "semantic_hit_rate": 0.9583333333333334,
+      "served_hit_rate": 0.6875,
+      "quality_adjusted_hit_rate": 0.6875,
+      "hit_precision": 1.0,
+      "false_hit_rate": 0.0,
+      "unevaluable_hit_rate": 0.0,
+      "stale_hit_rate": null,
+      "cost_per_query": null,
+      "no_cache_cost_per_query": null,
+      "relative_cost": null,
+      "cost_savings": null,
+      "controller_memory_bytes": null,
+      "net_benefit_after_controller": null,
+      "limitations": [
+        "Latency measures local policy and environment execution time.",
+        "Intent-label correctness is not independent response validation.",
+        "Staleness requires freshness ground truth.",
+        "Cost and net benefit require an explicit cost model.",
+        "Controller memory requires dedicated memory measurement."
+      ]
+    }
+  }
+}

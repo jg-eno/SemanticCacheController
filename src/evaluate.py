@@ -4,6 +4,7 @@
 import argparse
 from collections import Counter
 import json
+from pathlib import Path
 import time
 
 import numpy as np
@@ -15,8 +16,8 @@ from .env.semantic_cache_env import (
     FEATURE_NAMES,
 )
 from .models.semantic_cache import SentenceEncoder, cosine
-from .datasets.workload import read, generate
-from .evaluation_metrics import summarize
+from .datasets.workload import read
+from .evaluation_metrics import summarize, similarity_threshold_rule
 
 
 def always_reuse(observation):
@@ -27,6 +28,11 @@ def always_reuse(observation):
 def always_recompute(observation):
     """Always recompute the response."""
     return RECOMPUTE
+
+
+def similarity_threshold(observation, threshold=0.90):
+    """Reuse only when candidate cosine similarity meets the policy threshold."""
+    return similarity_threshold_rule(observation, threshold)
 
 
 def drift_rule(
@@ -47,6 +53,7 @@ def drift_rule(
 POLICIES = {
     "always_reuse": always_reuse,
     "always_recompute": always_recompute,
+    "similarity_threshold": similarity_threshold,
     "drift_rule": drift_rule,
 }
 
@@ -194,9 +201,14 @@ def compare(
     encoder,
     seed=0,
     include_timing=False,
+    similarity_threshold_value=0.90,
     **config,
 ):
-    """Compare the three deterministic policies."""
+    """Compare the four Stage 4 deterministic decision rules."""
+    policies = dict(POLICIES)
+    policies["similarity_threshold"] = lambda obs: similarity_threshold(
+        obs, similarity_threshold_value
+    )
     return {
         name: evaluate(
             workload,
@@ -206,7 +218,7 @@ def compare(
             include_timing=include_timing,
             **config,
         )
-        for name, policy in POLICIES.items()
+        for name, policy in policies.items()
     }
 
 
@@ -260,7 +272,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--workload",
-        help="Path to a workload file. Uses a generated workload if omitted.",
+        help="Path to a workload JSONL file. Uses the bundled example workload if omitted.",
     )
     parser.add_argument(
         "--include-timing",
@@ -288,6 +300,12 @@ if __name__ == "__main__":
         default=0.85,
         help="Cosine similarity threshold for CacheEval.",
     )
+    parser.add_argument(
+        "--decision-threshold",
+        type=float,
+        default=0.90,
+        help="Cosine similarity threshold for the Stage 4 decision rule.",
+    )
 
     args = parser.parse_args()
 
@@ -304,17 +322,17 @@ if __name__ == "__main__":
             threshold=args.threshold,
         )
     else:
-        workload = (
-            read(args.workload)
-            if args.workload
-            else generate(seed=args.seed)
+        workload_path = args.workload or (
+            Path(__file__).parent / "datasets" / "example_workload.jsonl"
         )
+        workload = read(workload_path)
 
         report = compare(
             workload,
             encoder,
             seed=args.seed,
             include_timing=args.include_timing,
+            similarity_threshold_value=args.decision_threshold,
         )
 
     output = json.dumps(report, indent=2, allow_nan=False)
