@@ -9,10 +9,10 @@ The current implementation is a simulation. Its results do not establish product
 Use Python 3.13 or later. From the repository root:
 
 ```sh
-python -m pip install numpy gymnasium datasets sentence-transformers
+python -m pip install numpy gymnasium datasets sentence-transformers torch
 ```
 
-Only NumPy and Gymnasium are needed for the default offline tests. Running the sample or evaluation with the default encoder downloads a sentence-embedding model on first use.
+NumPy, Gymnasium, and PyTorch are needed for the default offline tests. Running the sample or evaluation with the default encoder downloads a sentence-embedding model on first use.
 
 ## Quick start
 
@@ -45,6 +45,29 @@ python -m unittest discover -s src/tests -v
 
 The bundled workloads are synthetic examples. Default tests run without downloading datasets or embedding models. Use `python -m src.evaluate --help` and `python -m src.datasets.workload --help` for available commands and configuration.
 
+### Shared benchmark
+
+Run independently defined methods on the same environment trace:
+
+```sh
+python -m src.benchmark --settings examples/benchmark.json --methods examples/methods.json
+```
+
+The report is saved to `benchmark/results.json` by default. Use `--output path/to/report.json` to choose a different location; the destination directory is created automatically. Python's `__pycache__` directories contain compiled code, not benchmark results.
+
+The benchmark does not import or select any policy. Each entry in the methods JSON file names a `module:factory` and a settings object. The factory receives `seed` plus its settings and returns a callable that accepts only the observation and returns an environment action. Add your own factory to evaluate a new method without editing the benchmark. `src.method_adapters` contains optional wrappers for an existing policy function or a PPO checkpoint. A custom environment can be selected with `--env-factory`.
+
+For example, add a factory in `my_method.py`:
+
+```python
+def build(seed=0, novelty_limit=0.1):
+    return lambda observation: 0 if observation[1] <= novelty_limit else 1
+```
+
+Then add `"my_method": {"factory": "my_method:build", "settings": {"novelty_limit": 0.1}}` to the methods JSON. For a trained PPO model, use `"factory": "src.method_adapters:ppo_checkpoint"` with `"settings": {"checkpoint": "/path/to/best.pt"}`.
+
+Each method gets a fresh environment, and the runner checks that request IDs and phases match across runs. Each result has exactly five measures: requests, evaluable labeled requests, false-hit rate (incorrect reuse per evaluable labeled request), recomputation rate, and mean environment reward. A null false-hit rate means no requests were evaluable. The default encoder may download on first use. The bundled trace is a synthetic smoke test.
+
 ## Repository structure
 
 ```text
@@ -57,6 +80,7 @@ The bundled workloads are synthetic examples. Default tests run without download
 └── src/
     ├── semantic_cache.py       # Public environment imports
     ├── evaluate.py             # Baseline evaluation CLI
+    ├── benchmark.py            # Shared environment benchmark
     ├── rl/                     # PPO-Lagrangian training and evaluation
     ├── baseline_models/        # Additional baseline files
     ├── datasets/               # Workload adapters and example data
@@ -75,10 +99,10 @@ Install PyTorch in addition to the environment dependencies:
 
 ```sh
 python -m pip install torch
-python -m src.rl.train --env-factory your_adapter:make_env --train-settings train.json --validation-settings validation.json --output /tmp/cache-ppo-run --seed 0
+python -m src.rl.train --env-factory src.env.factory:make_env --train-settings train.json --validation-settings validation.json --output /tmp/cache-ppo-run --seed 0
 ```
 
-The environment factory is supplied explicitly; no existing environment import is assumed. Each settings file is a JSON object passed as keyword arguments to that callable. Registered environments can use `--env-factory gym:YourRegisteredID`. Use separate chronological training and validation traces. Record workload paths/revisions, encoder revision, cache capacity, retrieval threshold, reward settings and other environment options in those files. Training does not read held-out data.
+The repository factory accepts `workload_path`, optional `model` and `model_revision`, optional `rewards` as a JSON object, and other environment settings. Each settings file is a JSON object passed as keyword arguments to that callable. Custom factories can use `module:callable`, and registered environments can use `--env-factory gym:YourRegisteredID`. Use separate chronological training and validation traces. Record workload paths/revisions, encoder revision, cache capacity, retrieval threshold, reward settings and other environment options in those files. Training does not read held-out data.
 
 The adapter must preserve the six-feature float32 observation and actions 0/1. Step info must provide `effective_action`, `reuse_status` (`correct`, `incorrect`, `unevaluable`, `not_reused`), and finite `reward_components` including the signed `recompute_cost`; components must sum to the returned reward. For labeled-request coverage, provide boolean `labeled_request` in step info or pass `--train-labels` and `--validation-labels` JSON maps from request ID to source intent or null. These are offline metadata. Evaluation additionally requires `cache_hit`, fractional `cache_occupancy`, and `phase_id` for phase/transition reports.
 

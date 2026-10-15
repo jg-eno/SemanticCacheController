@@ -1,4 +1,4 @@
-"""Embedding retrieval and append-only FIFO admission; labels never affect lookup."""
+"""Embedding retrieval and FIFO cache admission; labels stay outside entries."""
 from dataclasses import dataclass
 import numpy as np
 
@@ -25,13 +25,11 @@ def cosine(a, b):
     return float(np.clip(np.dot(unit(a), unit(b)), -1, 1))
 
 
-@dataclass
+@dataclass(eq=False)
 class Entry:
     query: str
     embedding: np.ndarray
     response: object
-    intent_id: object
-    insertion_order: int
 
 
 class FIFOCache:
@@ -41,7 +39,7 @@ class FIFOCache:
         if not np.isfinite(threshold) or not -1 < threshold <= 1:
             raise ValueError('threshold must be in (-1, 1]')
         self.capacity, self.threshold = capacity, threshold
-        self.entries, self.next_order = [], 0
+        self.entries = []
 
     def lookup(self, embedding):
         unit(embedding)
@@ -51,11 +49,13 @@ class FIFOCache:
         index = int(np.argmax(scores))  # FIFO tie break
         return (self.entries[index], scores[index]) if scores[index] >= self.threshold else (None, None)
 
-    def admit(self, query, embedding, response, intent_id=None):
+    def admit(self, query, embedding, response):
         vector = unit(embedding)
         if self.entries and vector.shape != self.entries[0].embedding.shape:
             raise ValueError('Embedding dimensions must remain fixed')
+        evicted = None
         if len(self.entries) == self.capacity:
-            self.entries.pop(0)
-        self.entries.append(Entry(query, vector, response, intent_id, self.next_order))
-        self.next_order += 1
+            evicted = self.entries.pop(0)
+        entry = Entry(query, vector, response)
+        self.entries.append(entry)
+        return entry, evicted
