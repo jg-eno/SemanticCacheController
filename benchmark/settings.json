@@ -1,6 +1,6 @@
 {
   "workload_path": "src/datasets/example_workload.jsonl",
-  "capacity": 4,
-  "threshold": 0.99,
+  "capacity": 32,
+  "threshold": 0.85,
   "window": 16
 }

@@ -1,0 +1,82 @@
+{
+  "seed": 0,
+  "settings": {
+    "workload_path": "src/datasets/example_workload.jsonl",
+    "capacity": 32,
+    "threshold": 0.85,
+    "window": 16
+  },
+  "method_env_settings": {
+    "vCache_official_logic_delta_0.01": {
+      "workload_path": "src/datasets/example_workload.jsonl",
+      "capacity": 32,
+      "threshold": 0.85,
+      "window": 16
+    },
+    "vCache_official_logic_delta_0.02": {
+      "workload_path": "src/datasets/example_workload.jsonl",
+      "capacity": 32,
+      "threshold": 0.85,
+      "window": 16
+    },
+    "vCache_official_logic_delta_0.05": {
+      "workload_path": "src/datasets/example_workload.jsonl",
+      "capacity": 32,
+      "threshold": 0.85,
+      "window": 16
+    },
+    "vCache_official_logic_delta_0.02_lru": {
+      "workload_path": "src/datasets/example_workload.jsonl",
+      "capacity": 32,
+      "threshold": 0.85,
+      "window": 16,
+      "cache_policy": "lru"
+    },
+    "FIFO_static": {
+      "workload_path": "src/datasets/example_workload.jsonl",
+      "capacity": 32,
+      "threshold": 0.85,
+      "window": 16,
+      "cache_policy": "fifo"
+    }
+  },
+  "trace_sha256": "04b138bdf2bf20ed9f9672cb2a243061098d898477aa60939f3765c771ad2d06",
+  "results": {
+    "vCache_official_logic_delta_0.01": {
+      "requests": 96,
+      "evaluable_labeled_requests": 96,
+      "false_hit_rate": 0.0,
+      "recomputation_rate": 0.5833333333333334,
+      "mean_environment_reward": 0.3000000000000002
+    },
+    "vCache_official_logic_delta_0.02": {
+      "requests": 96,
+      "evaluable_labeled_requests": 96,
+      "false_hit_rate": 0.0,
+      "recomputation_rate": 0.25,
+      "mean_environment_reward": 0.6999999999999998
+    },
+    "vCache_official_logic_delta_0.05": {
+      "requests": 96,
+      "evaluable_labeled_requests": 96,
+      "false_hit_rate": 0.0,
+      "recomputation_rate": 0.20833333333333334,
+      "mean_environment_reward": 0.7499999999999999
+    },
+    "vCache_official_logic_delta_0.02_lru": {
+      "requests": 96,
+      "evaluable_labeled_requests": 96,
+      "false_hit_rate": 0.0,
+      "recomputation_rate": 0.25,
+      "mean_environment_reward": 0.6999999999999998
+    },
+    "FIFO_static": {
+      "requests": 96,
+      "evaluable_labeled_requests": 96,
+      "false_hit_rate": 0.0,
+      "recomputation_rate": 0.041666666666666664,
+      "mean_environment_reward": 0.9499999999999998
+    }
+  },
+  "limitation": "Offline simulation; intent labels are a proxy for answer correctness."
+}
