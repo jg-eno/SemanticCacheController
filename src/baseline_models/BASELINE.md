@@ -8,7 +8,7 @@ This folder contains deterministic cache-policy baselines using fixed-threshold 
 - `LRUSemanticCache` — evicts the least recently used cached entry.
 - `LFUSemanticCache` — evicts the least frequently used cached entry.
 
-These classes provide standalone lookup, reuse-quality, eviction, and summary-metric simulation. They do not call an LLM. They are separate from the shared environment benchmark: `src.benchmark` evaluates observation-to-action methods in `SemanticCacheEnv`, whose cache currently uses FIFO eviction. Its methods JSON cannot select these baseline cache classes as eviction policies.
+These classes provide standalone lookup, reuse-quality, eviction, and summary-metric simulation. They do not call an LLM. `SemanticCacheEnv` accepts `cache_policy` (`fifo`, `lifo`, `lru`, `lfu`), so the shared benchmark (`src.benchmark`) can run the same fixed-threshold method under each eviction policy: set `"env_settings": {"cache_policy": "lru"}` on a method in the methods JSON (see `benchmark/methods.json`). `vcache.py` adds a vCache action method (see "vCache baseline" below).
 
 ## Folder contents
 
@@ -35,6 +35,7 @@ This is the internal baseline format used by the cache logic itself:
 ```
 
 Here:
+
 - `embedding` is the query embedding vector used in cosine similarity checks
 - `true_cost` is the fresh-serving cost on a miss
 - `content_version` tracks whether the cached answer is stale
@@ -94,7 +95,7 @@ If multiple entries tie on the eviction criterion, the earliest inserted entry i
 
 - `n_queries` — number of processed records.
 - `hit_rate` — cache hits divided by total queries.
-- `stale_hit_rate` — known stale hits divided by all cache hits. Without explicit content versions, staleness cannot be determined and no stale hits are countezd; a reported `0.0` does not establish that answers were fresh.
+- `stale_hit_rate` — known stale hits divided by all cache hits. Without explicit content versions, staleness cannot be determined and no stale hits are counted; a reported `0.0` does not establish that answers were fresh.
 - `normalized_api_cost` — actual cost divided by the cost of processing every query without a cache.
 - `false_hit_rate` — incorrect reuse divided by evaluable labeled requests. A `null` value means no request could be evaluated.
 - `recomputation_rate` — requests recomputed divided by all requests.
@@ -112,7 +113,7 @@ python -m src.baseline_models.evaluate_workload src/datasets/example_workload.js
 python -m unittest src.tests.test_baseline_caches -v
 ```
 
-The evaluator prints metrics for `NoCacheBaseline`, FIFO, LIFO, LRU, and LFU on the workload and optional held-out workload. The default sentence encoder may download its model on first use. `python -m src.evaluate` evaluates action policies in the Gymnasium environment; it does not run these five cache classes. The shared benchmark in `src.benchmark` also evaluates action methods, and currently runs them against the environment's FIFO cache. Use that benchmark for action-policy comparisons, not as a direct LRU/LFU comparison.
+The evaluator prints metrics for `NoCacheBaseline`, FIFO, LIFO, LRU, and LFU on the workload and optional held-out workload. The default sentence encoder may download its model on first use. `python -m src.evaluate` evaluates action policies in the Gymnasium environment; it does not run these five cache classes. The shared benchmark in `src.benchmark` also evaluates action methods, and each method can choose the environment's eviction policy through `env_settings.cache_policy`.
 
 ## How to run the synthetic stub sanity check
 
@@ -145,6 +146,7 @@ print(cache.metrics())
 ```
 
 The `record` may be either:
+
 - a direct cache record with `embedding`, `true_cost`, `content_version`, `step`, or
 - a project workload row with `query`, `step`, and optional metadata.
 
@@ -170,6 +172,27 @@ records = make_stub_stream(
 
 The synthetic values are only sanity-check output. They are not benchmark results and should not be used as evidence about a real embedding model, workload, or API cost model.
 
+## Reading the eviction results
+
+The eviction policies only differ once the cache is full, so compare them at a capacity below the number of distinct cached items (on the bundled workload, about 2 to 6 slots at threshold 0.99). At capacity 4 and threshold 0.99 the recomputation rates are FIFO 18.75%, LRU 20.8%, LIFO 34.4% and LFU 37.5%.
+
+- The workload moves through topics in phases, so entries from an old phase go stale. FIFO and LRU drop them (the oldest entry is usually the previous topic), and on a phase-structured trace the two nearly coincide.
+- LIFO pins the first `capacity - 1` entries forever, so later topics share one slot.
+- LFU keeps old entries that built up high hit counts in an earlier phase, so new entries evict each other. Under recency-ordered drift, frequency is a poor signal.
+- At capacity 8 or more nothing is evicted and all policies tie at the number of distinct query strings (cold-start misses only).
+- The workload is a small synthetic trace (96 requests, 7 distinct query strings). A 2-request gap such as FIFO vs LRU is not evidence of a real difference.
+
+## vCache baseline
+
+`vcache.py` implements the decision policy of vCache (Schroeder et al., "vCache: Verified Semantic Prompt Caching", arXiv 2502.03771) as an action method for the environment. It is a re-implementation from the paper, not the authors' code. Where the static baselines compare similarity to one global threshold, vCache keeps observations (similarity, was-reuse-correct) per cached entry, fits a sigmoid to them, and reuses an answer unless an exploration draw with probability `tau` (derived from the error bound `delta`) says to recompute and check it.
+
+- **Method:** `src.baseline_models.vcache:make_vcache_method`, with setting `delta` (default 0.02). See `benchmark/methods_vcache.json`.
+- **Run:** `python -m src.benchmark --settings benchmark/settings.json --methods benchmark/methods_vcache.json --output benchmark/results_vcache.json`
+- **Labels:** the explore path simulates the LLM call by comparing intent labels, so it needs a labeled workload. Intent labels are a proxy for answer correctness, as elsewhere in this project. Labels are read only when the method explores.
+- **Deviations from the paper:** a grid search replaces the paper's optimiser; `t'(eps)` is a posterior quantile over `t` with `gamma` fixed at its point estimate; the environment inserts every recomputed answer, so a correct explore's new entry shares its parent's observations.
+- **Guarantee:** `delta` is a target false-hit rate in the paper's analysis, not something these tests prove for this simulation.
+- **Tests:** `python -m unittest src.tests.test_vcache_baseline -v` needs only numpy.
+
 ## Input boundary
 
-The standalone cache classes accept direct cache records or project workload rows through `process(record)`. They do not consume Gymnasium observations or actions. The shared benchmark uses the environment's own cache implementation, so comparing these eviction policies within that benchmark requires making the environment's eviction policy configurable and running each policy on the same workload and settings.
+The standalone cache classes accept direct cache records or project workload rows through `process(record)`. They do not consume Gymnasium observations or actions. The environment constructs the same classes (except FIFO, which uses `src.models.semantic_cache.FIFOCache`) when `cache_policy` is `lifo`, `lru` or `lfu`.

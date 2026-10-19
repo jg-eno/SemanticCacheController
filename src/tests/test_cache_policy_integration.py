@@ -1,8 +1,7 @@
-
 import unittest
 import numpy as np
 
-from src.env.semantic_cache_env import SemanticCacheEnv
+from src.env.semantic_cache_env import FEATURE_NAMES, SemanticCacheEnv
 from src.models.semantic_cache import FIFOCache
 
 
@@ -62,7 +61,7 @@ class CachePolicyIntegrationTests(unittest.TestCase):
 
                 observation, _ = env.reset()
 
-                self.assertEqual(observation.shape, (6,))
+                self.assertEqual(observation.shape, (len(FEATURE_NAMES),))
 
                 for _ in range(4):
                     observation, reward, terminated, truncated, info = env.step(0)

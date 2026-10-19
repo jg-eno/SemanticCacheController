@@ -247,7 +247,7 @@ class SemanticCacheBaseline:
             cached_content_version=None,
             cost_at_cache_time=self.default_true_cost,
             last_used_step=step,
-            hit_count=0,
+            hit_count=1,  # same as _insert(): the insertion counts as the first use
             intent_id=intent_id,
             query=query,
             response=response,
