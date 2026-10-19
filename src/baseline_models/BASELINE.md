@@ -35,7 +35,6 @@ This is the internal baseline format used by the cache logic itself:
 ```
 
 Here:
-
 - `embedding` is the query embedding vector used in cosine similarity checks
 - `true_cost` is the fresh-serving cost on a miss
 - `content_version` tracks whether the cached answer is stale
@@ -146,7 +145,6 @@ print(cache.metrics())
 ```
 
 The `record` may be either:
-
 - a direct cache record with `embedding`, `true_cost`, `content_version`, `step`, or
 - a project workload row with `query`, `step`, and optional metadata.
 
@@ -192,6 +190,55 @@ The eviction policies only differ once the cache is full, so compare them at a c
 - **Deviations from the paper:** a grid search replaces the paper's optimiser; `t'(eps)` is a posterior quantile over `t` with `gamma` fixed at its point estimate; the environment inserts every recomputed answer, so a correct explore's new entry shares its parent's observations.
 - **Guarantee:** `delta` is a target false-hit rate in the paper's analysis, not something these tests prove for this simulation.
 - **Tests:** `python -m unittest src.tests.test_vcache_baseline -v` needs only numpy.
+
+## Running the official vCache policy
+
+`vcache_official.py` runs the authors' own `VerifiedDecisionPolicy` (not the re-implementation in `vcache.py`) on a workload. It plugs this repo's encoder and intent labels into the official `vcache` package and reports the same metrics as the benchmark. No official code is copied here; the package is imported as installed.
+
+**Environment.** The official package must be installed in its own environment:
+
+- **Linux only, Python 3.10 to 3.12.** `vcache` imports `vllm` unconditionally, and `vllm` has no Windows build. Use WSL2, Colab or Kaggle. Its pins also exclude Python 3.13, so this is separate from the main venv.
+- **Heavy install.** Its dependencies include `vllm`, `torch`, `langchain`, `chromadb` and `faiss`.
+
+```bash
+python3.11 -m venv .venv-vcache && source .venv-vcache/bin/activate
+git clone https://github.com/vcache-project/vCache third_party/vCache
+git -C third_party/vCache checkout 50694eebf0c870231030f73707cb6543d47f0411
+pip install -e third_party/vCache
+pip install scikit-learn gymnasium datasets      # this repo's imports and the benchmark group
+python -m src.baseline_models.vcache_official --workload src/datasets/example_workload.jsonl --deltas 0.01 0.02 0.05
+```
+
+The commit above is the one this adapter was written against. Do not commit `third_party/` or `.venv-vcache/`; the official repository is licensed CC BY-NC-ND 3.0 (non-commercial, no derivatives), so use it unmodified.
+
+**What the numbers mean.**
+
+- The official policy owns its cache: it searches all entries, has no global similarity threshold, and does no eviction. So results are comparable with the benchmark's metrics but are not the same experiment as `SemanticCacheEnv` with a threshold and capacity.
+- Correctness is the intent-label match, the same proxy used elsewhere in this project.
+- The official policy always explores (recomputes and checks) until a cached entry has at least 6 observations. On the 96-request example workload (7 distinct queries) it will therefore mostly explore. Judge it on a much larger workload, such as one generated from SemCacheLMArena with `src.datasets.workload`.
+- Runs are seeded (`--seed`), and the adapter waits for each background update before the next request, so repeated runs match.
+- `src/tests/test_vcache_official_adapter.py` tests only the adapter's own bookkeeping and waiting with stand-ins. It does not run the official policy.
+
+## vCache hybrid (official decision logic inside our environment)
+
+`vcache_hybrid.py` runs the authors' own decision code, `_Algorithm` from `vcache.vcache_policy.strategies.verified`, inside `SemanticCacheEnv`. It is a hybrid, not the official system end to end.
+
+**Official (imported unmodified):** per-entry observation storage (`EmbeddingMetadataObj`, including its seed points), the explore/exploit decision (`select_action`: explores until an entry has 6 observations, then fits the logistic model, computes tau and draws the coin) and the learning step (`add_observation_to_metadata`).
+
+**Ours (the differences):**
+- The cache is the environment's: capacity, eviction policy (`cache_policy`) and the environment's similarity threshold, which gates the nearest neighbour. The official system has no global threshold, no capacity and no eviction.
+- Similarity is the environment's cosine similarity, not the HNSW score.
+- The "LLM call" is simulated from intent labels (read only when exploring).
+- Updates are applied immediately instead of in a background thread.
+- The environment always inserts a recomputed answer; the official policy inserts only when the cached answer was wrong. After a correct explore the inserted entry shares its parent's observations.
+
+Run it in the official-vCache environment (Linux, Python 3.10 to 3.12; see above), because it imports the official package:
+
+```bash
+python -m src.benchmark --settings benchmark/settings.json --methods benchmark/methods_vcache_hybrid.json --output benchmark/results_vcache_hybrid.json
+```
+
+Tests: `python -m unittest src.tests.test_vcache_hybrid -v`. Most use a stand-in for the algorithm and need only numpy; the tests against the real algorithm are skipped unless `vcache` is installed. Use this method when comparing with the RL agent under the same cache; use `vcache_official.py` for the end-to-end official run.
 
 ## Input boundary
 

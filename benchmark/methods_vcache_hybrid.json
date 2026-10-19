@@ -1,0 +1,24 @@
+{
+  "vCache_official_logic_delta_0.01": {
+    "factory": "src.baseline_models.vcache_hybrid:make_official_decision_method",
+    "settings": {"delta": 0.01}
+  },
+  "vCache_official_logic_delta_0.02": {
+    "factory": "src.baseline_models.vcache_hybrid:make_official_decision_method",
+    "settings": {"delta": 0.02}
+  },
+  "vCache_official_logic_delta_0.05": {
+    "factory": "src.baseline_models.vcache_hybrid:make_official_decision_method",
+    "settings": {"delta": 0.05}
+  },
+  "vCache_official_logic_delta_0.02_lru": {
+    "factory": "src.baseline_models.vcache_hybrid:make_official_decision_method",
+    "settings": {"delta": 0.02},
+    "env_settings": {"cache_policy": "lru"}
+  },
+  "FIFO_static": {
+    "factory": "src.baseline_models.benchmark_methods:make_fixed_threshold_method",
+    "settings": {},
+    "env_settings": {"cache_policy": "fifo"}
+  }
+}

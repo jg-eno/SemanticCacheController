@@ -1,0 +1,35 @@
+{
+  "seed": 0,
+  "settings": {
+    "workload": "src/datasets/example_workload.jsonl",
+    "model": "sentence-transformers/all-MiniLM-L6-v2",
+    "model_revision": null
+  },
+  "results": {
+    "official_vCache_delta_0.01": {
+      "requests": 96,
+      "evaluable_labeled_requests": 96,
+      "false_hit_rate": 0.0,
+      "recomputation_rate": 0.4583333333333333,
+      "mean_environment_reward": 0.4499999999999999,
+      "explorations": 43
+    },
+    "official_vCache_delta_0.02": {
+      "requests": 96,
+      "evaluable_labeled_requests": 96,
+      "false_hit_rate": 0.0,
+      "recomputation_rate": 0.25,
+      "mean_environment_reward": 0.6999999999999998,
+      "explorations": 23
+    },
+    "official_vCache_delta_0.05": {
+      "requests": 96,
+      "evaluable_labeled_requests": 96,
+      "false_hit_rate": 0.0,
+      "recomputation_rate": 0.16666666666666666,
+      "mean_environment_reward": 0.7999999999999998,
+      "explorations": 15
+    }
+  },
+  "limitation": "Official vCache policy with its own cache (no similarity gate, no eviction); intent labels are a proxy for answer correctness."
+}
