@@ -1,5 +1,10 @@
 /.venv
 __pycache__/
+*.py[cod]
+
+# Generated embeddings and Hugging Face download cache
+data/semantic_cache_workload/*.npz
+data/semantic_cache_workload/.cache/
 src/datasets/dataset.ipynb
 
 # Local internal algorithm documentation

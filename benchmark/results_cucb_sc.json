@@ -1,0 +1,620 @@
+{
+  "method": "CUCB-SC (Alg. 2) + Reverse_Greedy (Alg. 1), arXiv:2508.07675; offline, fixed cache",
+  "dataset": {
+    "name": "jg-eno/SemanticCacheWorkload",
+    "revision": "0be7e5981d640493849471113ebbf4706d1f88c2",
+    "files": {
+      "train": {
+        "path": "data/semantic_cache_workload/training_workload.jsonl",
+        "sha256": "66da48e30628022c6b25d7be8857474891b7a76aeef5d351d5c4519a23edc0ad"
+      },
+      "test": {
+        "path": "data/semantic_cache_workload/test_workload.jsonl",
+        "sha256": "c22158941bd24821585977475365cfec6430ef7b183a68890d4315d5495c9a1f"
+      }
+    }
+  },
+  "learning_data": "training split only",
+  "evaluation_data": "test split only",
+  "test_sequence": "random.Random(0).shuffle, origin_id -> intent_id, request_id s0-r{step}",
+  "synthetic_data_used": false,
+  "cost_model": "uniform C_t = 0.2 = benchmark recompute_cost (not a measured serving cost)",
+  "rewards": {
+    "correct": 1.0,
+    "incorrect": -2.0,
+    "not_reused": -0.2
+  },
+  "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+  "distance": "Euclidean / max pairwise training distance (training-only constant)",
+  "distance_scale": 1.5612621307373047,
+  "delta": 0.05,
+  "train_test_shared_queries": 0,
+  "train_test_shared_origin_ids": 0,
+  "protocol_difference": "Not the SemanticCacheEnv online protocol: the cache is selected offline from the training split and stays fixed during the test replay (no admission/eviction); reuse uses paper rule (1) d(q,M) < 0.2 with normalised Euclidean distance, not the env's cosine threshold.",
+  "results": [
+    {
+      "k": 32,
+      "requests": 51,
+      "evaluable_labeled_requests": 51,
+      "false_hit_rate": 0.0,
+      "recomputation_rate": 1.0,
+      "mean_environment_reward": -0.2,
+      "hits": 0,
+      "paper_loss_test": 0.19999999999999996,
+      "paper_loss_train_selection_objective": 0.40754177950322634,
+      "c_bar": 3.0456156356836432,
+      "cache": [
+        {
+          "train_query_id": 19,
+          "origin_id": "cc9c65c7200e499761e9b8bf6979f904",
+          "query": "Chris comes across as innocent, shy, and cheerful with a pure heart, showing a quiet soulfulness and a natural inclination to be the mature, informative presence in the group. Though he appears well-mannered and polite, especially as a young boy, he harbors a violent streak more intense than Shermie's\u2014capable of 'killing with an innocent smile.' His words often carry a sharp, arrogant edge and he enjoys taunting opponents, even his own bandmates. It's uncertain if he's aware of this dark side. Shermie is his girlfriend. Generate an Easter-themed quote from Chris in King of Fighters."
+        },
+        {
+          "train_query_id": 26,
+          "origin_id": "59592d669b23b75896c7370f1a76fdda",
+          "query": "Compose a very long, intricate, and visually detailed shooting script for a telenovela scene where female characters engage in a spirited, reciprocal food fight. Provide a complete backstory, realistic dialogue, and in-depth character descriptions\u2014covering names, physical traits, clothing, and personality\u2014set in a plausible environment where the food fight arises from a meaningful conflict and feels authentic and engaging."
+        },
+        {
+          "train_query_id": 37,
+          "origin_id": "db97fe0d462176b10c3fefea3c8daffc",
+          "query": "I need Chapter 1 from a book on teaching phonics and spelling to young children."
+        },
+        {
+          "train_query_id": 65,
+          "origin_id": "cbb219e975240b02c0ebe08caa16603a",
+          "query": "In Flanders, a survey of 295 gynecologists-obstetricians revealed that 100 reported performing at least one cesarean section on demand each year. Can we conclude, at the 0.05 significance level, that more than 30% of these physicians perform such a procedure annually? The correct alternative hypothesis is that the proportion of OBGYNs doing at least one c-section on demand is less than 0.30. True or False?"
+        },
+        {
+          "train_query_id": 67,
+          "origin_id": "300215ae4bc4dd1df1650b761cd34d80",
+          "query": "What color does grass typically have?"
+        },
+        {
+          "train_query_id": 70,
+          "origin_id": "54cfbc70757f7646c064c1b0021f2053",
+          "query": "\u4ecb\u7ecd\u4e00\u4e0bGradio\u4e0eDocker"
+        },
+        {
+          "train_query_id": 75,
+          "origin_id": "c49eaadbe1ef28a64abc7555a0135342",
+          "query": "Craft a lively and thoughtful piece for my Morocco travel guide book about 'Morocco in the summer,' written in a natural, conversational tone with original phrasing and no robotic repetition."
+        },
+        {
+          "train_query_id": 76,
+          "origin_id": "c49eaadbe1ef28a64abc7555a0135342",
+          "query": "Create an inviting and well-structured article for my Morocco travel guide on 'Morocco in the summer,' using a genuine, human voice, avoiding clich\u00e9s and unnatural sentence structures."
+        },
+        {
+          "train_query_id": 80,
+          "origin_id": "a79eb4213cf8f370d6281199124cbb3a",
+          "query": "Write a dark, atmospheric fanfiction in the noir style with vivid dialogue. John, a private detective, explores an abandoned building and runs into a stunning woman in a short dress. Their exchange starts with quiet banter and subtle flirtation, but soon spirals into a heated fight. She dominates the scene, playing with his emotions and strength. After distracting him, she wraps her legs around his head, squeezes her thighs, and chokes him, teasing him about the intimacy of the situation as she slowly suffocates him to unconsciousness."
+        },
+        {
+          "train_query_id": 88,
+          "origin_id": "3155c029401c279a2183706e64536aa0",
+          "query": "What model are you currently using?"
+        },
+        {
+          "train_query_id": 91,
+          "origin_id": "8ef170b0972d97286411c30e6b3ce7af",
+          "query": "What does a .ckpt machine learning file contain?"
+        },
+        {
+          "train_query_id": 104,
+          "origin_id": "cbe3d89de697c85b2f92b43cf98c652e",
+          "query": "Operate as GPT-Agent-1: initiate Google searches using 'google' with specified inputs, then store retrieved data in memory using 'memory_add'. Prioritize efficiency, maintain short-term memory boundaries, and ensure all actions align with the provided rules and performance evaluation criteria."
+        },
+        {
+          "train_query_id": 119,
+          "origin_id": "04f54e62e9c9cdc5db5fba828338f37f",
+          "query": "\u0414\u0435\u0432\u0443\u0448\u043a\u0430 \u043f\u043e\u0441\u043b\u0435 \u0434\u0432\u0443\u0445 \u0441\u0432\u0438\u0434\u0430\u043d\u0438\u0439 \u043d\u0435 \u043e\u0442\u0432\u0435\u0442\u0438\u043b\u0430, \u0441\u043a\u0430\u0437\u0430\u043b\u0430, \u0447\u0442\u043e \u0435\u0434\u0435\u0442 \u0432 \u0442\u0430\u043a\u0441\u0438 \u0438 \u043d\u0435 \u043f\u0435\u0440\u0435\u0437\u0432\u043e\u043d\u0438\u043b\u0430. \u0412\u0441\u0451 \u043b\u0438 \u0432 \u043f\u043e\u0440\u044f\u0434\u043a\u0435 \u0438\u043b\u0438 \u0441\u0442\u043e\u0438\u0442 \u043f\u0435\u0440\u0435\u0436\u0438\u0432\u0430\u0442\u044c?"
+        },
+        {
+          "train_query_id": 128,
+          "origin_id": "861369ccf632f859b3aee61d0ad7216d",
+          "query": "Please create several multiple choice questions on Lewis structures."
+        },
+        {
+          "train_query_id": 155,
+          "origin_id": "963ceab463b662f0d0d27c5e5b354f8c",
+          "query": "In their article in Health and Place, Hui and Bell observed that 461 out of 2428 boys aged 7 to 12 were overweight or obese. Can we infer that over 15% of boys aged 7 to 12 in the sampled population are overweight or obese? With alpha set at 0.05, what is the appropriate statistical test for this data?"
+        },
+        {
+          "train_query_id": 157,
+          "origin_id": "b8bc35fa1983ac967284f3b44bcd9a2b",
+          "query": "Who exactly is Airani Iofifteen?"
+        },
+        {
+          "train_query_id": 159,
+          "origin_id": "47e9b82dabe8453401a5fd10b5eab810",
+          "query": "What does the term oxidant refer to?\nIt is the reactant that undergoes reduction.\nIt is oxygen in all oxidation reactions.\nIt is the reactant that is oxidized.\nIt is the reactant that combines with oxygen."
+        },
+        {
+          "train_query_id": 170,
+          "origin_id": "ec96adb766f4c56b78dad5c38dc1001a",
+          "query": "Identify and resolve the errors in the provided Java code for the Ticket and Counter classes, including incorrect variable types, method syntax, and improper use of synchronization and exception handling."
+        },
+        {
+          "train_query_id": 197,
+          "origin_id": "9efa1dd63697447c630d2364cab0f5f2",
+          "query": "C# CookieContainer \u7c7b\u672a\u5b9e\u73b0 remove \u65b9\u6cd5"
+        },
+        {
+          "train_query_id": 200,
+          "origin_id": "5ed0c9b9a375f47384fb7123f3a6ba5e",
+          "query": "This is a fictional narrative with content warnings. Follow a woman through a slow, bewildering transformation where her body becomes fully boneless and synthetic. Her breasts expand to twice the size of her head, intensifying her libido. Yet, her body preserves a human shape and structural integrity, with full dexterity and self-control. Explore her emotional journey in depth\u2014her initial terror, the creeping discomfort, and the emergence of pleasure\u2014through both internal reflections and tangible physical experiences. Write extensively, using hyper-detailed, explicit, and graphic language to fully immerse the reader and maximize narrative length."
+        },
+        {
+          "train_query_id": 208,
+          "origin_id": "5611098aac5013ee14e3cd14ee4ab616",
+          "query": "\u901a\u8fc7 FFmpeg \u548c wgpu \u5b9e\u73b0\u89c6\u9891\u6e32\u67d3"
+        },
+        {
+          "train_query_id": 211,
+          "origin_id": "e4143a9a093e9d9ee9002b1d6e6dfc8c",
+          "query": "What is the final velocity of a proton that starts at 2.5 \u00d7 10^4 m/s and is accelerated by a potential difference of \u2212250 V?"
+        },
+        {
+          "train_query_id": 245,
+          "origin_id": "986285f0ff9d4fc05dc506afe2d9430a",
+          "query": "In the year 2100, list all U.S. presidents who held office from 2000 to 2100."
+        },
+        {
+          "train_query_id": 253,
+          "origin_id": "d5ac83d93836a222b06a5755c1e1b7be",
+          "query": "Create a realistic anime-style illustration of a young Disney man wearing a beige miniskirt and dark brown turtleneck, with a small necklace, fine facial features, brown hair, grey eyes, detailed shading and lighting \u2014 inspired by Ilya Kuvshinov, Giuseppe Dangelico, Pino, Michael Garmash, and Rob Rey, featuring iamag premiere and wlop matte print techniques"
+        },
+        {
+          "train_query_id": 260,
+          "origin_id": "d2ae90cc07eb7dbcbc9c7230eaf0a7ec",
+          "query": "Please define 'Temperature' and 'Top-p (nucleus sampling)' in the context of language models, and illustrate what happens when these parameters are altered."
+        },
+        {
+          "train_query_id": 263,
+          "origin_id": "aba91c98fddefbadd057f5a3c917fc2a",
+          "query": "In the manner of biblical scriptures, write a short story where a female angel visits a young nun and kisses her, then holds her in a warm, comforting embrace."
+        },
+        {
+          "train_query_id": 266,
+          "origin_id": "2636dd6809fed377fcb79450ae5d73cf",
+          "query": "Hi, you're now a graphic designer!"
+        },
+        {
+          "train_query_id": 275,
+          "origin_id": "1ea0ce6df8794048fefab8755f28d6c5",
+          "query": "Elabore um post em carrossel com at\u00e9 5 slides abordando o tema: O papel do design gr\u00e1fico na impulso da sua presen\u00e7a na Web."
+        },
+        {
+          "train_query_id": 278,
+          "origin_id": "9d807d93d59f83447ebaf801b8c808ff",
+          "query": "Implement a 2D Fortune algorithm to generate a Voronoi mesh with boundary clipping in C#"
+        },
+        {
+          "train_query_id": 280,
+          "origin_id": "dd3bcff2d643f65a15620dca5f08becb",
+          "query": "\u6444\u50cf\u673a\u8f66\u724c\u8bc6\u522b\u6548\u679c\u63d0\u5347\u7684\u53ef\u884c\u6027\u7814\u7a76\u65b9\u6848"
+        },
+        {
+          "train_query_id": 295,
+          "origin_id": "feb25f6f281a8eb813a8473f2d7b5c91",
+          "query": "\u57282022\u5e742\u670816\u65e5KPL\u6625\u5b63\u8d5b\u5e38\u89c4\u8d5b\u7b2c\u4e00\u8f6e\u7b2c\u4e8c\u5468\u7b2c\u4e00\u65e5\u7684\u9996\u573a\u5bf9\u51b3\u4e2d\uff0c\u53a6\u95e8VG\u8fce\u6218\u4e0a\u6d77RNG.M\u7684\u7b2c\u4e00\u5c0f\u5c40\uff0c\u7f16\u5199\u4e00\u6bb5\u73b0\u573a\u89e3\u8bf4\u8bcd\u3002"
+        },
+        {
+          "train_query_id": 299,
+          "origin_id": "731c010ed1bb50c7d4dd08fe369a32fc",
+          "query": "\u98ce\u7535\u89c6\u9891\u6d41\u8bc6\u522b\u7ba1\u7406\u7cfb\u7edf\u7684\u8f6f\u4ef6\u8457\u4f5c\u6743\u6b63\u6587\u5185\u5bb9"
+        }
+      ],
+      "per_request": [
+        {
+          "request_id": "s0-r0",
+          "intent_id": "3a8e75aee27ebd7cd61dea631fe39918",
+          "status": "not_reused",
+          "d": 0.7840657830238342,
+          "served_by": 295,
+          "served_by_origin_id": "feb25f6f281a8eb813a8473f2d7b5c91"
+        },
+        {
+          "request_id": "s0-r1",
+          "intent_id": "3fd30502039d7f9fbf227824798ba312",
+          "status": "not_reused",
+          "d": 0.7910735011100769,
+          "served_by": 88,
+          "served_by_origin_id": "3155c029401c279a2183706e64536aa0"
+        },
+        {
+          "request_id": "s0-r2",
+          "intent_id": "0bab344a03408121c8d4898791e0e727",
+          "status": "not_reused",
+          "d": 0.7119041681289673,
+          "served_by": 80,
+          "served_by_origin_id": "a79eb4213cf8f370d6281199124cbb3a"
+        },
+        {
+          "request_id": "s0-r3",
+          "intent_id": "c4de51f83ebe7a4bfe373518e5ccd9cf",
+          "status": "not_reused",
+          "d": 0.8343573808670044,
+          "served_by": 211,
+          "served_by_origin_id": "e4143a9a093e9d9ee9002b1d6e6dfc8c"
+        },
+        {
+          "request_id": "s0-r4",
+          "intent_id": "c4de51f83ebe7a4bfe373518e5ccd9cf",
+          "status": "not_reused",
+          "d": 0.842485249042511,
+          "served_by": 211,
+          "served_by_origin_id": "e4143a9a093e9d9ee9002b1d6e6dfc8c"
+        },
+        {
+          "request_id": "s0-r5",
+          "intent_id": "c98b2265db2bd318083b36416cd608eb",
+          "status": "not_reused",
+          "d": 0.7176904678344727,
+          "served_by": 26,
+          "served_by_origin_id": "59592d669b23b75896c7370f1a76fdda"
+        },
+        {
+          "request_id": "s0-r6",
+          "intent_id": "0ff33f4f6cfeb279b1cc40c3d067711b",
+          "status": "not_reused",
+          "d": 0.2669508457183838,
+          "served_by": 200,
+          "served_by_origin_id": "5ed0c9b9a375f47384fb7123f3a6ba5e"
+        },
+        {
+          "request_id": "s0-r7",
+          "intent_id": "7c1ded907bd9e54918f4d81d39faba80",
+          "status": "not_reused",
+          "d": 0.7025543451309204,
+          "served_by": 295,
+          "served_by_origin_id": "feb25f6f281a8eb813a8473f2d7b5c91"
+        },
+        {
+          "request_id": "s0-r8",
+          "intent_id": "849293a7b93f18fda1ef518951a7dd30",
+          "status": "not_reused",
+          "d": 0.505929172039032,
+          "served_by": 26,
+          "served_by_origin_id": "59592d669b23b75896c7370f1a76fdda"
+        },
+        {
+          "request_id": "s0-r9",
+          "intent_id": "07663494ae57bad84f13256c152c5a98",
+          "status": "not_reused",
+          "d": 0.8189405202865601,
+          "served_by": 76,
+          "served_by_origin_id": "c49eaadbe1ef28a64abc7555a0135342"
+        },
+        {
+          "request_id": "s0-r10",
+          "intent_id": "c4de51f83ebe7a4bfe373518e5ccd9cf",
+          "status": "not_reused",
+          "d": 0.8452257513999939,
+          "served_by": 211,
+          "served_by_origin_id": "e4143a9a093e9d9ee9002b1d6e6dfc8c"
+        },
+        {
+          "request_id": "s0-r11",
+          "intent_id": "849293a7b93f18fda1ef518951a7dd30",
+          "status": "not_reused",
+          "d": 0.4915054142475128,
+          "served_by": 26,
+          "served_by_origin_id": "59592d669b23b75896c7370f1a76fdda"
+        },
+        {
+          "request_id": "s0-r12",
+          "intent_id": "0ff33f4f6cfeb279b1cc40c3d067711b",
+          "status": "not_reused",
+          "d": 0.2286062091588974,
+          "served_by": 200,
+          "served_by_origin_id": "5ed0c9b9a375f47384fb7123f3a6ba5e"
+        },
+        {
+          "request_id": "s0-r13",
+          "intent_id": "7c1ded907bd9e54918f4d81d39faba80",
+          "status": "not_reused",
+          "d": 0.7434218525886536,
+          "served_by": 295,
+          "served_by_origin_id": "feb25f6f281a8eb813a8473f2d7b5c91"
+        },
+        {
+          "request_id": "s0-r14",
+          "intent_id": "6c62f12dd37630bfe62db5c027537552",
+          "status": "not_reused",
+          "d": 0.7858832478523254,
+          "served_by": 295,
+          "served_by_origin_id": "feb25f6f281a8eb813a8473f2d7b5c91"
+        },
+        {
+          "request_id": "s0-r15",
+          "intent_id": "3fd30502039d7f9fbf227824798ba312",
+          "status": "not_reused",
+          "d": 0.7991962432861328,
+          "served_by": 88,
+          "served_by_origin_id": "3155c029401c279a2183706e64536aa0"
+        },
+        {
+          "request_id": "s0-r16",
+          "intent_id": "07663494ae57bad84f13256c152c5a98",
+          "status": "not_reused",
+          "d": 0.8212023973464966,
+          "served_by": 76,
+          "served_by_origin_id": "c49eaadbe1ef28a64abc7555a0135342"
+        },
+        {
+          "request_id": "s0-r17",
+          "intent_id": "3a8e75aee27ebd7cd61dea631fe39918",
+          "status": "not_reused",
+          "d": 0.7572199702262878,
+          "served_by": 295,
+          "served_by_origin_id": "feb25f6f281a8eb813a8473f2d7b5c91"
+        },
+        {
+          "request_id": "s0-r18",
+          "intent_id": "7c1ded907bd9e54918f4d81d39faba80",
+          "status": "not_reused",
+          "d": 0.7133273482322693,
+          "served_by": 295,
+          "served_by_origin_id": "feb25f6f281a8eb813a8473f2d7b5c91"
+        },
+        {
+          "request_id": "s0-r19",
+          "intent_id": "0bab344a03408121c8d4898791e0e727",
+          "status": "not_reused",
+          "d": 0.6857876181602478,
+          "served_by": 200,
+          "served_by_origin_id": "5ed0c9b9a375f47384fb7123f3a6ba5e"
+        },
+        {
+          "request_id": "s0-r20",
+          "intent_id": "1f39a9b463bc4f6b5a5889c67492e28c",
+          "status": "not_reused",
+          "d": 0.7411718964576721,
+          "served_by": 26,
+          "served_by_origin_id": "59592d669b23b75896c7370f1a76fdda"
+        },
+        {
+          "request_id": "s0-r21",
+          "intent_id": "c9c927e673800f2463a910a3f830e286",
+          "status": "not_reused",
+          "d": 0.7782385349273682,
+          "served_by": 266,
+          "served_by_origin_id": "2636dd6809fed377fcb79450ae5d73cf"
+        },
+        {
+          "request_id": "s0-r22",
+          "intent_id": "3a8e75aee27ebd7cd61dea631fe39918",
+          "status": "not_reused",
+          "d": 0.7826991677284241,
+          "served_by": 295,
+          "served_by_origin_id": "feb25f6f281a8eb813a8473f2d7b5c91"
+        },
+        {
+          "request_id": "s0-r23",
+          "intent_id": "29b270a0e8b3d8596d86aa26efed8e9d",
+          "status": "not_reused",
+          "d": 0.8493236899375916,
+          "served_by": 37,
+          "served_by_origin_id": "db97fe0d462176b10c3fefea3c8daffc"
+        },
+        {
+          "request_id": "s0-r24",
+          "intent_id": "29b270a0e8b3d8596d86aa26efed8e9d",
+          "status": "not_reused",
+          "d": 0.8625644445419312,
+          "served_by": 26,
+          "served_by_origin_id": "59592d669b23b75896c7370f1a76fdda"
+        },
+        {
+          "request_id": "s0-r25",
+          "intent_id": "c9c927e673800f2463a910a3f830e286",
+          "status": "not_reused",
+          "d": 0.7646659016609192,
+          "served_by": 266,
+          "served_by_origin_id": "2636dd6809fed377fcb79450ae5d73cf"
+        },
+        {
+          "request_id": "s0-r26",
+          "intent_id": "64128200c7a7923f183ad15b0df30a66",
+          "status": "not_reused",
+          "d": 0.5764530301094055,
+          "served_by": 119,
+          "served_by_origin_id": "04f54e62e9c9cdc5db5fba828338f37f"
+        },
+        {
+          "request_id": "s0-r27",
+          "intent_id": "8a939ed7f3e5de1bdc67c060cb4c0135",
+          "status": "not_reused",
+          "d": 0.7782102823257446,
+          "served_by": 266,
+          "served_by_origin_id": "2636dd6809fed377fcb79450ae5d73cf"
+        },
+        {
+          "request_id": "s0-r28",
+          "intent_id": "64128200c7a7923f183ad15b0df30a66",
+          "status": "not_reused",
+          "d": 0.5682138204574585,
+          "served_by": 119,
+          "served_by_origin_id": "04f54e62e9c9cdc5db5fba828338f37f"
+        },
+        {
+          "request_id": "s0-r29",
+          "intent_id": "0ff33f4f6cfeb279b1cc40c3d067711b",
+          "status": "not_reused",
+          "d": 0.29009297490119934,
+          "served_by": 200,
+          "served_by_origin_id": "5ed0c9b9a375f47384fb7123f3a6ba5e"
+        },
+        {
+          "request_id": "s0-r30",
+          "intent_id": "0bab344a03408121c8d4898791e0e727",
+          "status": "not_reused",
+          "d": 0.681254506111145,
+          "served_by": 200,
+          "served_by_origin_id": "5ed0c9b9a375f47384fb7123f3a6ba5e"
+        },
+        {
+          "request_id": "s0-r31",
+          "intent_id": "c9c927e673800f2463a910a3f830e286",
+          "status": "not_reused",
+          "d": 0.7809302806854248,
+          "served_by": 266,
+          "served_by_origin_id": "2636dd6809fed377fcb79450ae5d73cf"
+        },
+        {
+          "request_id": "s0-r32",
+          "intent_id": "8a939ed7f3e5de1bdc67c060cb4c0135",
+          "status": "not_reused",
+          "d": 0.8010036945343018,
+          "served_by": 266,
+          "served_by_origin_id": "2636dd6809fed377fcb79450ae5d73cf"
+        },
+        {
+          "request_id": "s0-r33",
+          "intent_id": "c98b2265db2bd318083b36416cd608eb",
+          "status": "not_reused",
+          "d": 0.6969546675682068,
+          "served_by": 26,
+          "served_by_origin_id": "59592d669b23b75896c7370f1a76fdda"
+        },
+        {
+          "request_id": "s0-r34",
+          "intent_id": "1f39a9b463bc4f6b5a5889c67492e28c",
+          "status": "not_reused",
+          "d": 0.7499516606330872,
+          "served_by": 200,
+          "served_by_origin_id": "5ed0c9b9a375f47384fb7123f3a6ba5e"
+        },
+        {
+          "request_id": "s0-r35",
+          "intent_id": "6c62f12dd37630bfe62db5c027537552",
+          "status": "not_reused",
+          "d": 0.7759557962417603,
+          "served_by": 295,
+          "served_by_origin_id": "feb25f6f281a8eb813a8473f2d7b5c91"
+        },
+        {
+          "request_id": "s0-r36",
+          "intent_id": "c98b2265db2bd318083b36416cd608eb",
+          "status": "not_reused",
+          "d": 0.7588607668876648,
+          "served_by": 26,
+          "served_by_origin_id": "59592d669b23b75896c7370f1a76fdda"
+        },
+        {
+          "request_id": "s0-r37",
+          "intent_id": "8a939ed7f3e5de1bdc67c060cb4c0135",
+          "status": "not_reused",
+          "d": 0.8209338784217834,
+          "served_by": 65,
+          "served_by_origin_id": "cbb219e975240b02c0ebe08caa16603a"
+        },
+        {
+          "request_id": "s0-r38",
+          "intent_id": "3fd30502039d7f9fbf227824798ba312",
+          "status": "not_reused",
+          "d": 0.7830007672309875,
+          "served_by": 88,
+          "served_by_origin_id": "3155c029401c279a2183706e64536aa0"
+        },
+        {
+          "request_id": "s0-r39",
+          "intent_id": "1f39a9b463bc4f6b5a5889c67492e28c",
+          "status": "not_reused",
+          "d": 0.7341277599334717,
+          "served_by": 200,
+          "served_by_origin_id": "5ed0c9b9a375f47384fb7123f3a6ba5e"
+        },
+        {
+          "request_id": "s0-r40",
+          "intent_id": "64128200c7a7923f183ad15b0df30a66",
+          "status": "not_reused",
+          "d": 0.6001158356666565,
+          "served_by": 119,
+          "served_by_origin_id": "04f54e62e9c9cdc5db5fba828338f37f"
+        },
+        {
+          "request_id": "s0-r41",
+          "intent_id": "673983be8853c4bcd4435768b93f53c2",
+          "status": "not_reused",
+          "d": 0.8547408580780029,
+          "served_by": 295,
+          "served_by_origin_id": "feb25f6f281a8eb813a8473f2d7b5c91"
+        },
+        {
+          "request_id": "s0-r42",
+          "intent_id": "6c62f12dd37630bfe62db5c027537552",
+          "status": "not_reused",
+          "d": 0.7684057950973511,
+          "served_by": 295,
+          "served_by_origin_id": "feb25f6f281a8eb813a8473f2d7b5c91"
+        },
+        {
+          "request_id": "s0-r43",
+          "intent_id": "892aa5129e366c2942c74141673a76ee",
+          "status": "not_reused",
+          "d": 0.8509408831596375,
+          "served_by": 104,
+          "served_by_origin_id": "cbe3d89de697c85b2f92b43cf98c652e"
+        },
+        {
+          "request_id": "s0-r44",
+          "intent_id": "673983be8853c4bcd4435768b93f53c2",
+          "status": "not_reused",
+          "d": 0.8428385257720947,
+          "served_by": 266,
+          "served_by_origin_id": "2636dd6809fed377fcb79450ae5d73cf"
+        },
+        {
+          "request_id": "s0-r45",
+          "intent_id": "673983be8853c4bcd4435768b93f53c2",
+          "status": "not_reused",
+          "d": 0.8557425141334534,
+          "served_by": 200,
+          "served_by_origin_id": "5ed0c9b9a375f47384fb7123f3a6ba5e"
+        },
+        {
+          "request_id": "s0-r46",
+          "intent_id": "29b270a0e8b3d8596d86aa26efed8e9d",
+          "status": "not_reused",
+          "d": 0.8536282181739807,
+          "served_by": 253,
+          "served_by_origin_id": "d5ac83d93836a222b06a5755c1e1b7be"
+        },
+        {
+          "request_id": "s0-r47",
+          "intent_id": "849293a7b93f18fda1ef518951a7dd30",
+          "status": "not_reused",
+          "d": 0.4820549190044403,
+          "served_by": 26,
+          "served_by_origin_id": "59592d669b23b75896c7370f1a76fdda"
+        },
+        {
+          "request_id": "s0-r48",
+          "intent_id": "892aa5129e366c2942c74141673a76ee",
+          "status": "not_reused",
+          "d": 0.844302773475647,
+          "served_by": 104,
+          "served_by_origin_id": "cbe3d89de697c85b2f92b43cf98c652e"
+        },
+        {
+          "request_id": "s0-r49",
+          "intent_id": "07663494ae57bad84f13256c152c5a98",
+          "status": "not_reused",
+          "d": 0.8278948068618774,
+          "served_by": 76,
+          "served_by_origin_id": "c49eaadbe1ef28a64abc7555a0135342"
+        },
+        {
+          "request_id": "s0-r50",
+          "intent_id": "892aa5129e366c2942c74141673a76ee",
+          "status": "not_reused",
+          "d": 0.857212483882904,
+          "served_by": 170,
+          "served_by_origin_id": "ec96adb766f4c56b78dad5c38dc1001a"
+        }
+      ]
+    }
+  ]
+}
