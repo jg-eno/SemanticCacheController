@@ -1,0 +1,57 @@
+{
+  "static_fifo": {
+    "factory": "src.baseline_models.benchmark_methods:make_fixed_threshold_method",
+    "settings": {},
+    "env_settings": {
+      "cache_policy": "fifo"
+    }
+  },
+  "static_lifo": {
+    "factory": "src.baseline_models.benchmark_methods:make_fixed_threshold_method",
+    "settings": {},
+    "env_settings": {
+      "cache_policy": "lifo"
+    }
+  },
+  "static_lru": {
+    "factory": "src.baseline_models.benchmark_methods:make_fixed_threshold_method",
+    "settings": {},
+    "env_settings": {
+      "cache_policy": "lru"
+    }
+  },
+  "static_lfu": {
+    "factory": "src.baseline_models.benchmark_methods:make_fixed_threshold_method",
+    "settings": {},
+    "env_settings": {
+      "cache_policy": "lfu"
+    }
+  },
+  "vCache_logic_delta_0.01": {
+    "factory": "src.baseline_models.vcache_hybrid:make_official_decision_method",
+    "settings": {
+      "delta": 0.01
+    }
+  },
+  "vCache_logic_delta_0.02": {
+    "factory": "src.baseline_models.vcache_hybrid:make_official_decision_method",
+    "settings": {
+      "delta": 0.02
+    }
+  },
+  "vCache_logic_delta_0.05": {
+    "factory": "src.baseline_models.vcache_hybrid:make_official_decision_method",
+    "settings": {
+      "delta": 0.05
+    }
+  },
+  "vCache_logic_delta_0.02_lru": {
+    "factory": "src.baseline_models.vcache_hybrid:make_official_decision_method",
+    "settings": {
+      "delta": 0.02
+    },
+    "env_settings": {
+      "cache_policy": "lru"
+    }
+  }
+}
