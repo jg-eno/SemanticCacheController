@@ -75,6 +75,21 @@ def run(method, workload, embeddings):
     return env
 
 
+class SkipEnv(FakeEnv):
+    """FakeEnv that honours env.skip_admission, like SemanticCacheEnv."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.skip_admission = False
+
+    def step(self, action):
+        if action == RECOMPUTE and self.skip_admission:
+            self.index += 1
+        else:
+            super().step(action)
+        self.skip_admission = False
+
+
 class StandInMetadata:
     def __init__(self, embedding_id, response):
         self.embedding_id, self.response = embedding_id, response
@@ -175,6 +190,37 @@ class DecisionMappingTests(unittest.TestCase):
         self.assertIs(first, second)                                    # parent and duplicate share
         # one observation from the first explore, one from the second on the shared object
         self.assertEqual(len(first.observations), 2)
+
+
+class SkipAdmissionTests(unittest.TestCase):
+    def test_correct_explore_asks_the_environment_not_to_insert(self):
+        method, algorithm = method_with(["explore"])
+        workload, embeddings = confusable_workload(1)
+        embeddings["q1"] = embeddings["q0"]
+        workload.append(dict(query="q1", intent_id=workload[0]["intent_id"], step=1))
+        env = SkipEnv(workload, embeddings)
+        env.prepare(); env.step(method.select_action(None, env))          # cold miss inserts
+        self.assertEqual(len(env.cache.entries), 1)
+        env.prepare()
+        action = method.select_action(None, env)                          # explore, correct
+        self.assertEqual(action, RECOMPUTE)
+        self.assertTrue(env.skip_admission)
+        self.assertIsNone(method._alias_of)                               # nothing to alias
+        env.step(action)
+        self.assertEqual(len(env.cache.entries), 1)                       # no duplicate inserted
+
+    def test_incorrect_explore_still_inserts(self):
+        method, algorithm = method_with(["explore"])
+        workload, embeddings = confusable_workload(1)
+        embeddings["q1"] = embeddings["q0"]
+        workload.append(dict(query="q1", intent_id="OTHER", step=1))
+        env = SkipEnv(workload, embeddings)
+        env.prepare(); env.step(method.select_action(None, env))
+        env.prepare()
+        action = method.select_action(None, env)
+        self.assertFalse(env.skip_admission)
+        env.step(action)
+        self.assertEqual(len(env.cache.entries), 2)                       # the new answer is cached
 
 
 class WholeRunTests(unittest.TestCase):

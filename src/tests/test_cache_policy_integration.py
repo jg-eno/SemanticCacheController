@@ -84,6 +84,20 @@ class CachePolicyIntegrationTests(unittest.TestCase):
 
         self.assertIsInstance(env.cache, FIFOCache)
 
+    def test_skip_admission_recomputes_without_inserting_for_one_step(self):
+        env = SemanticCacheEnv(workload=make_workload(), encoder=DummyEncoder(), capacity=4,
+                               threshold=0.85)
+        env.reset()
+        env.step(1)                                  # recompute: inserts "A"
+        self.assertEqual(len(env.cache.entries), 1)
+        env.skip_admission = True
+        _, _, _, _, info = env.step(1)               # recompute "B" without inserting
+        self.assertEqual(len(env.cache.entries), 1)
+        self.assertEqual(info["recompute_count"], 2)
+        self.assertFalse(env.skip_admission)         # the flag lasts one step only
+        env.step(1)                                  # the next recompute inserts again
+        self.assertEqual(len(env.cache.entries), 2)
+
     def test_unknown_policy_is_rejected(self):
         with self.assertRaises(ValueError):
             SemanticCacheEnv(

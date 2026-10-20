@@ -27,9 +27,14 @@ What is this repository's (the differences from the official system)
                         background thread. The explore decision for the next request sees
                         the same state as the adapter in `vcache_official.py` after it
                         waits for the queue.
-- insertion           : the environment always inserts a recomputed answer; the official
-                        policy inserts it only when the cached answer was wrong. After a
-                        correct explore the inserted entry shares its parent's metadata.
+- insertion           : like the official policy, no entry is added after an explore that
+                        found the cached answer correct (the method sets
+                        `env.skip_admission` for that step; the environment honours it).
+                        Without this, every exploration inserted a near-duplicate, the
+                        small cache churned, entries were evicted before they collected 6
+                        observations, and the method stayed in exploration. For environments
+                        without `skip_admission`, the inserted duplicate shares its parent's
+                        metadata instead.
 
 Requirements: the official package installed (Linux, Python 3.10-3.12; see BASELINE.md,
 "Running the official vCache policy"). Action convention: REUSE = 0, RECOMPUTE = 1.
@@ -120,7 +125,11 @@ class OfficialDecisionMethod:
             self.algorithm.add_observation_to_metadata(
                 similarity_score=similarity, is_correct=correct, metadata=metadata)
             if correct:
-                self._alias_of = metadata
+                if hasattr(env, "skip_admission"):
+                    # Like the official policy: no entry is added after a correct explore.
+                    env.skip_admission = True
+                else:
+                    self._alias_of = metadata   # environments that always insert
         return RECOMPUTE
 
 

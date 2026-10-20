@@ -92,6 +92,7 @@ class SemanticCacheEnv(gym.Env):
             )
 
         self.cached_intents = {}
+        self.skip_admission = False
         self.drift_detector = ProjectionHistogramDrift(**self.drift_config)
         self.history = deque(maxlen=2 * self.drift_detector.window - 1)
         self.misses, self.reuses = deque(maxlen=self.window), deque(maxlen=self.window)
@@ -131,24 +132,29 @@ class SemanticCacheEnv(gym.Env):
             self.reuse_count += 1
         else:
             response = self.response_provider({k: v for k, v in row.items() if k != 'intent_id'})
-            
-            if self.cache_policy == 'fifo':
-                entry, evicted = self.cache.admit(
-                    row['query'], self.embedding, response
-                )
-            else:
-                entry, evicted = self.cache.admit(
-                    row['query'],
-                    self.embedding,
-                    response,
-                    step=row['step'],
-                    intent_id=row['intent_id'],
-                )
 
-            if evicted is not None:
-                del self.cached_intents[evicted]
-            self.cached_intents[entry] = row['intent_id']
+            # A method may set `skip_admission` before this step to recompute without
+            # inserting (vCache adds no entry after an exploration that found the cached
+            # answer correct). It applies to this step only and is off by default.
+            if not self.skip_admission:
+                if self.cache_policy == 'fifo':
+                    entry, evicted = self.cache.admit(
+                        row['query'], self.embedding, response
+                    )
+                else:
+                    entry, evicted = self.cache.admit(
+                        row['query'],
+                        self.embedding,
+                        response,
+                        step=row['step'],
+                        intent_id=row['intent_id'],
+                    )
+
+                if evicted is not None:
+                    del self.cached_intents[evicted]
+                self.cached_intents[entry] = row['intent_id']
             self.recompute_count += 1
+        self.skip_admission = False
         components = self.rewards.components(status, not reuse)
         self.history.append(self.embedding.copy())
         self.misses.append(not hit)
